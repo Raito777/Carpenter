@@ -1,3 +1,5 @@
+#include <random>
+#include <vector>
 #include "Boid.hpp"
 #include "GLContext.hpp"
 #include "glimac/common.hpp"
@@ -16,50 +18,26 @@ int main()
         "shaders/3D.vs.glsl",
         "shaders/normals.fs.glsl"
     );
+
     shader.use();
 
-    glEnable(GL_DEPTH_TEST);
+    Boid boid;
+    Boid boid1({-0.5, 0.5, -6});
+    Boid boid2({0.5, 0.3, -2});
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    Boid boid3({-1, -0.5, -8});
 
-    const std::vector<glimac::ShapeVertex> vertices = glimac::cone_vertices(1.f, 0.5f, 3, 3);
+    std::vector<Boid> boids;
+    boids.push_back(boid);
+    boids.push_back(boid1);
+    boids.push_back(boid2);
+    boids.push_back(boid3);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glimac::ShapeVertex), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLContext glContext(boids);
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    static constexpr GLuint VERTEX_ATTR_POSITION  = 0;
-    static constexpr GLuint VERTEX_ATTR_COLOR     = 1;
-    static constexpr GLuint VERTEX_ATTR_TEXCOORDS = 2;
-
-    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-    glEnableVertexAttribArray(VERTEX_ATTR_COLOR);
-    glEnableVertexAttribArray(VERTEX_ATTR_TEXCOORDS);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, position)));
-    glVertexAttribPointer(VERTEX_ATTR_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, normal)));
-    glVertexAttribPointer(VERTEX_ATTR_TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, texCoords)));
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
-
-    GLint uMVPMatrix    = glGetUniformLocation(shader.id(), "uMVPMatrix");
-    GLint uMVMatrix     = glGetUniformLocation(shader.id(), "uMVMatrix");
-    GLint uNormalMatrix = glGetUniformLocation(shader.id(), "uNormalMatrix");
-
-    glm::mat4 ProjMatrix, MVMatrix, NormalMatrix;
-
-    ProjMatrix   = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
-    MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5));
-    NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
+    glContext.initBuffers();
+    glContext.initTransformations(ctx);
+    glContext.setShaderGlints(shader.id());
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
@@ -68,16 +46,10 @@ int main()
         /*********************************
          * HERE SHOULD COME THE RENDERING CODE
          *********************************/
-        glBindVertexArray(vao);
         shader.use();
-        glUniformMatrix4fv(uMVPMatrix, 1, GL_FALSE, glm::value_ptr(ProjMatrix * MVMatrix));
-        glUniformMatrix4fv(uMVMatrix, 1, GL_FALSE, glm::value_ptr(MVMatrix));
-        glUniformMatrix4fv(uNormalMatrix, 1, GL_FALSE, glm::value_ptr(NormalMatrix));
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-        glBindVertexArray(0);
+        glContext.drawBoids();
     };
-    // Should be done last. It starts the infinite loop.
+    glContext.deleteBuffers();
+    //  Should be done last. It starts the infinite loop.
     ctx.start();
-    glDeleteBuffers(0, &vbo);
-    glDeleteVertexArrays(0, &vao);
 }

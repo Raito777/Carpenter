@@ -32,13 +32,13 @@ private:
 
 public:
     GLContext(const std::vector<Boid>& boidsContainer);
-    ~GLContext();
 
     void initBuffers();
     void initTransformations(p6::Context& ctx);
     void setBoidsVertices(const std::vector<glimac::ShapeVertex>& vertices);
     void setShaderGlints(const int& shaderId);
     void drawBoids();
+    void deleteBuffers();
 
     // const p6::Shader GLContext::loadShaders();
 };

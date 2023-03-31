@@ -14,4 +14,6 @@ public:
 
     Boid()
         : m_position({0, 0, -5}){};
+    Boid(const glm::vec3& position)
+        : m_position(position){};
 };

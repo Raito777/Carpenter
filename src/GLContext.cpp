@@ -13,14 +13,14 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 {
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
 void GLContext::initBuffers()
 {
     glGenBuffers(1, &this->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 
-    this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 3, 3));
+    this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
 
     glBufferData(GL_ARRAY_BUFFER, this->m_BoidVertices.size() * sizeof(glimac::ShapeVertex), this->m_BoidVertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -76,6 +76,12 @@ void GLContext::drawBoids()
         glDrawArrays(GL_TRIANGLES, 0, this->m_BoidVertices.size());
     }
     glBindVertexArray(0);
+}
+
+void GLContext::deleteBuffers()
+{
+    glDeleteBuffers(0, &this->vbo);
+    glDeleteVertexArrays(0, &this->vao);
 }
 
 // const p6::Shader GLContext::loadShaders()
