@@ -1,8 +1,9 @@
+#include "Boid.hpp"
+#include "GLContext.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
 #include "glm/ext.hpp"
 #include "p6/p6.h"
-
 int main()
 {
     auto ctx = p6::Context{{1280, 720, "TP3 EX1"}};
