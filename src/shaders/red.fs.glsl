@@ -7,5 +7,5 @@ in vec2 vTextureCoordinate;
 out vec4 fFragColor;
 
 void main() {
-    fFragColor = vNormal;
+    fFragColor = vec4(1,0,0,1);
 }

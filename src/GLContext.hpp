@@ -2,8 +2,11 @@
 
 #include <stdlib.h>
 #include <random>
+#include <string_view>
 #include <vector>
 #include "Boid.hpp"
+#include "GLVao.hpp"
+#include "GLVbo.hpp"
 #include "glimac/common.hpp"
 #include "glm/ext.hpp"
 #include "glm/fwd.hpp"
@@ -27,16 +30,17 @@ private:
     transformations                  m_transformations;
     std::vector<glimac::ShapeVertex> m_BoidVertices;
     shaderGlints                     m_shaderGlints;
-    GLuint                           vbo;
-    GLuint                           vao;
+    GLVbo                            m_vbo;
+    GLVao                            m_vao;
+    p6::Shader                       m_shader = p6::load_shader("shaders/3D.vs.glsl", "shaders/red.fs.glsl");
 
 public:
     GLContext(const std::vector<Boid>& boidsContainer);
 
-    void initBuffers();
     void initTransformations(p6::Context& ctx);
     void setBoidsVertices(const std::vector<glimac::ShapeVertex>& vertices);
-    void setShaderGlints(const int& shaderId);
+    void setShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+    void setShaderGlints();
     void drawBoids();
     void deleteBuffers();
 

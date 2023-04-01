@@ -14,13 +14,6 @@ int main()
     /*********************************
      * HERE SHOULD COME THE INITIALIZATION CODE
      *********************************/
-    const p6::Shader shader = p6::load_shader(
-        "shaders/3D.vs.glsl",
-        "shaders/normals.fs.glsl"
-    );
-
-    shader.use();
-
     Boid boid;
     Boid boid1({-0.5, 0.5, -6});
     Boid boid2({0.5, 0.3, -2});
@@ -34,10 +27,9 @@ int main()
     boids.push_back(boid3);
 
     GLContext glContext(boids);
+    glContext.setShader("shaders/3D.vs.glsl", "shaders/red.fs.glsl");
 
-    glContext.initBuffers();
     glContext.initTransformations(ctx);
-    glContext.setShaderGlints(shader.id());
 
     // Declare your infinite update loop.
     ctx.update = [&]() {
@@ -46,7 +38,6 @@ int main()
         /*********************************
          * HERE SHOULD COME THE RENDERING CODE
          *********************************/
-        shader.use();
         glContext.drawBoids();
     };
     glContext.deleteBuffers();
