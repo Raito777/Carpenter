@@ -17,9 +17,9 @@ int main()
      *********************************/
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 100; i++)
+    for (size_t i = 0; i < 10; i++)
     {
-        glm::vec3 position{p6::random::number(-ctx.aspect_ratio(), ctx.aspect_ratio()), p6::random::number(-1, 1), p6::random::number(-10, 0)};
+        glm::vec3 position{p6::random::number(-ctx.aspect_ratio(), ctx.aspect_ratio()), p6::random::number(-1, 1), p6::random::number(-5, 0)};
         Boid      boid(position);
         boids.push_back(boid);
     }
@@ -45,7 +45,6 @@ int main()
     ctx.update = [&]() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glContext.drawBoids(ctx);
     };
     glContext.deleteBuffers();

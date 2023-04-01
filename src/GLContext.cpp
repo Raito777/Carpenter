@@ -1,5 +1,6 @@
 #include "GLContext.hpp"
 #include <vcruntime.h>
+#include <glm/gtx/vector_angle.hpp>
 #include <iostream>
 #include <string_view>
 #include <vector>
@@ -99,27 +100,21 @@ void GLContext::drawBoids(p6::Context& ctx)
 
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
+        this->m_boidsContainer[i].moove();
+        this->m_boidsContainer[i].checkBorder(ctx);
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION (NORMALEMENT)
         glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
-        glm::vec3 axis      = glm::normalize(direction);
-        float     angle     = glm::acos(glm::dot(axis, glm::vec3(0, 0, 1)));
-        // calculer l'axe de rotation
-        if (glm::length(glm::cross(axis, glm::vec3(0, 0, 1))) < glm::epsilon<float>())
-        {
-            // les vecteurs sont colinéaires, choisir un autre axe
-            axis = glm::vec3(1, 0, 0);
-        }
-        else
-        {
-            axis = glm::normalize(glm::cross(axis, glm::vec3(0, 0, 1)));
-        }
+        glm::vec3 up        = glm::vec3(0.0f, 1.0f, 0.0f); // vecteur up par défaut
+        glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
+        float     angle     = glm::degrees(glm::acos(glm::dot(up, direction)));
+
+        this->m_transformations.MVMatrix = glm::translate(this->m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
+        this->m_transformations.MVMatrix = glm::rotate(this->m_transformations.MVMatrix, angle, axis);
+        std::cout << angle << "\n";
         //-------------------------------------//
         glUniform3fv(this->m_lightSetup.uKd, 1, glm::value_ptr(this->m_lightSetup._uKd[i]));
         glUniform3fv(this->m_lightSetup.uKs, 1, glm::value_ptr(this->m_lightSetup._uKs[i]));
         glUniform1f(this->m_lightSetup.uShininess, this->m_lightSetup._uShininess[i]);
-
-        this->m_transformations.MVMatrix = glm::translate(this->m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
-        this->m_transformations.MVMatrix = glm::rotate(this->m_transformations.MVMatrix, angle, axis);
 
         glUniformMatrix4fv(this->m_shaderGlints.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_transformations.ProjMatrix * this->m_transformations.MVMatrix));
         glUniformMatrix4fv(this->m_shaderGlints.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_transformations.MVMatrix));

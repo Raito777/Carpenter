@@ -11,9 +11,42 @@ class Boid {
 private:
 public:
     glm::vec3 m_position;
-    glm::vec3 m_direction = glm::vec3(p6::random::number(-0.1, 0.1), p6::random::number(-0.1, 0.1), p6::random::number(-0.1, 0.1));
+    glm::vec3 m_direction = glm::vec3(p6::random::number(-0.01, 0.01), p6::random::number(-0.01, 0.01), p6::random::number(-0.01, 0.01));
     Boid()
         : m_position({0, 0, -5}){};
     Boid(const glm::vec3& position)
         : m_position(position){};
+
+    void moove()
+    {
+        this->m_position += this->m_direction;
+    }
+
+    void checkBorder(p6::Context& ctx)
+    {
+        if (this->m_position.x > ctx.aspect_ratio())
+        {
+            this->m_direction.x = -this->m_direction.x;
+        }
+        if (this->m_position.y > 1)
+        {
+            this->m_direction.y = -this->m_direction.y;
+        }
+        if (this->m_position.x < -ctx.aspect_ratio())
+        {
+            this->m_direction.x = -this->m_direction.x;
+        }
+        if (this->m_position.y < -1)
+        {
+            this->m_direction.y = -this->m_direction.y;
+        }
+        if (this->m_position.z < -5)
+        {
+            this->m_direction.z = -this->m_direction.z;
+        }
+        if (this->m_position.z > 0)
+        {
+            this->m_direction.z = -this->m_direction.z;
+        }
+    }
 };
