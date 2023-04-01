@@ -6,6 +6,7 @@
 #include "Boid.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
+#include "glimac/sphere_vertices.hpp"
 #include "glm/ext.hpp"
 #include "p6/p6.h"
 
@@ -21,10 +22,11 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 
     this->m_vbo = GLVbo();
 
-    this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
+    this->setBoidsVertices(glimac::cone_vertices(0.2f, 0.1f, 16, 32));
     glBufferData(GL_ARRAY_BUFFER, this->m_BoidVertices.size() * sizeof(glimac::ShapeVertex), this->m_BoidVertices.data(), GL_STATIC_DRAW);
 
     this->m_vbo.unBind();
+
     this->m_vao = GLVao();
 
     static constexpr GLuint VERTEX_ATTR_POSITION  = 0;
@@ -43,13 +45,22 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 
     this->m_vbo.unBind();
     this->m_vao.unBind();
+
+    for (size_t i = 0; i < this->m_boidsContainer.size() + 1; i++)
+    {
+        this->m_lightSetup._uKd.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
+        this->m_lightSetup._uKs.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
+        this->m_lightSetup._uLightIntensity.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
+        this->m_lightSetup._uShininess.push_back(glm::linearRand(0.f, 1.0f));
+    }
+    this->m_lightSetup.light = glm::vec3(0, 1, -3);
 }
 
 void GLContext::initTransformations(p6::Context& ctx)
 {
     this->m_transformations.ProjMatrix   = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
-    this->m_transformations.MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5));
-    this->m_transformations.NormalMatrix = glm::transpose(glm::inverse(this->m_transformations.ProjMatrix));
+    this->m_transformations.MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+    this->m_transformations.NormalMatrix = glm::transpose(glm::inverse(this->m_transformations.MVMatrix));
 }
 
 void GLContext::setBoidsVertices(const std::vector<glimac::ShapeVertex>& vertices)
@@ -62,14 +73,54 @@ void GLContext::setShaderGlints()
     this->m_shaderGlints.uMVPMatrix    = glGetUniformLocation(this->m_shader.id(), "uMVPMatrix");
     this->m_shaderGlints.uMVMatrix     = glGetUniformLocation(this->m_shader.id(), "uMVMatrix");
     this->m_shaderGlints.uNormalMatrix = glGetUniformLocation(this->m_shader.id(), "uNormalMatrix");
+    this->m_lightSetup.uAmbient        = glGetUniformLocation(m_shader.id(), "uKa");
+    this->m_lightSetup.uKd             = glGetUniformLocation(m_shader.id(), "uKd");
+    this->m_lightSetup.uKs             = glGetUniformLocation(m_shader.id(), "uKs");
+    this->m_lightSetup.uShininess      = glGetUniformLocation(m_shader.id(), "uShininess");
+    this->m_lightSetup.uLightPos_vs    = glGetUniformLocation(m_shader.id(), "uLightPos_vs");
+    this->m_lightSetup.uLightIntensity = glGetUniformLocation(m_shader.id(), "uLightIntensity");
 }
-void GLContext::drawBoids()
+void GLContext::drawBoids(p6::Context& ctx)
 {
+    // this->m_camera.moveFront(0.1f);
+    float movementStrength = 30.f;
+    this->m_camera.rotateLeft(ctx.mouse_delta().y * movementStrength);
+    this->m_camera.rotateUp(ctx.mouse_delta().x * movementStrength);
+
+    ctx.mouse() = {0, 0};
     this->m_shader.use();
     this->m_vao.bind();
+
+    glm::vec3 uMVLightPos = glm::vec3(this->m_camera.getViewMatrix() * glm::vec4(this->m_lightSetup.light, 1));
+
+    glUniform3fv(this->m_lightSetup.uLightPos_vs, 1, glm::value_ptr(uMVLightPos));
+    glUniform3fv(this->m_lightSetup.uLightIntensity, 1, glm::value_ptr(glm::vec3(2.f, 2.f, 2.f)));
+    glUniform3fv(this->m_lightSetup.uAmbient, 1, glm::value_ptr(glm::vec3(0.05f, 0.05f, 0.05f)));
+
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
-        this->m_transformations.MVMatrix = glm::translate(glm::mat4(1.0f), this->m_boidsContainer[i].m_position);
+        // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION (NORMALEMENT)
+        glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
+        glm::vec3 axis      = glm::normalize(direction);
+        float     angle     = glm::acos(glm::dot(axis, glm::vec3(0, 0, 1)));
+        // calculer l'axe de rotation
+        if (glm::length(glm::cross(axis, glm::vec3(0, 0, 1))) < glm::epsilon<float>())
+        {
+            // les vecteurs sont colinéaires, choisir un autre axe
+            axis = glm::vec3(1, 0, 0);
+        }
+        else
+        {
+            axis = glm::normalize(glm::cross(axis, glm::vec3(0, 0, 1)));
+        }
+        //-------------------------------------//
+        glUniform3fv(this->m_lightSetup.uKd, 1, glm::value_ptr(this->m_lightSetup._uKd[i]));
+        glUniform3fv(this->m_lightSetup.uKs, 1, glm::value_ptr(this->m_lightSetup._uKs[i]));
+        glUniform1f(this->m_lightSetup.uShininess, this->m_lightSetup._uShininess[i]);
+
+        this->m_transformations.MVMatrix = glm::translate(this->m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
+        this->m_transformations.MVMatrix = glm::rotate(this->m_transformations.MVMatrix, angle, axis);
+
         glUniformMatrix4fv(this->m_shaderGlints.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_transformations.ProjMatrix * this->m_transformations.MVMatrix));
         glUniformMatrix4fv(this->m_shaderGlints.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_transformations.MVMatrix));
         glUniformMatrix4fv(this->m_shaderGlints.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_transformations.NormalMatrix));
@@ -89,12 +140,3 @@ void GLContext::setShader(const std::string& vertexShaderPath, const std::string
     this->m_shader = p6::load_shader(vertexShaderPath, fragmentShaderPath);
     this->setShaderGlints();
 }
-
-// const p6::Shader GLContext::loadShaders()
-// {
-//     const p6::Shader shader = p6::load_shader(
-//         "shaders/3D.vs.glsl",
-//         "shaders/normals.fs.glsl"
-//     );
-//     return shader;
-// }

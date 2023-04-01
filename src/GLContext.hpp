@@ -7,6 +7,7 @@
 #include "Boid.hpp"
 #include "GLVao.hpp"
 #include "GLVbo.hpp"
+#include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
 #include "glm/ext.hpp"
 #include "glm/fwd.hpp"
@@ -24,6 +25,21 @@ struct shaderGlints {
     GLint uNormalMatrix;
 };
 
+struct lightSetup {
+    GLint uAmbient;
+    GLint uKd;
+    GLint uKs;
+    GLint uShininess;
+    GLint uLightPos_vs;
+    GLint uLightIntensity;
+
+    std::vector<glm::vec3> _uKd;
+    std::vector<glm::vec3> _uKs;
+    std::vector<float>     _uShininess;
+    std::vector<glm::vec3> _uLightIntensity;
+    glm::vec3              light;
+};
+
 class GLContext {
 private:
     std::vector<Boid>                m_boidsContainer;
@@ -33,15 +49,17 @@ private:
     GLVbo                            m_vbo;
     GLVao                            m_vao;
     p6::Shader                       m_shader = p6::load_shader("shaders/3D.vs.glsl", "shaders/red.fs.glsl");
+    lightSetup                       m_lightSetup;
 
 public:
-    GLContext(const std::vector<Boid>& boidsContainer);
+    TrackballCamera m_camera;
 
+    GLContext(const std::vector<Boid>& boidsContainer);
     void initTransformations(p6::Context& ctx);
     void setBoidsVertices(const std::vector<glimac::ShapeVertex>& vertices);
     void setShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
     void setShaderGlints();
-    void drawBoids();
+    void drawBoids(p6::Context& ctx);
     void deleteBuffers();
 
     // const p6::Shader GLContext::loadShaders();

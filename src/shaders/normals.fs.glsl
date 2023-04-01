@@ -1,11 +1,12 @@
-#version 330 core
+#version 330
 
-in vec4 vPosition;
-in vec4 vNormal;
-in vec2 vTextureCoordinate;
+//variables d'entrées
+in vec3 vPosition_vs;
+in vec3 vNormal_vs;
+in vec2 vTexCoords;
 
 out vec4 fFragColor;
 
 void main() {
-    fFragColor = vNormal;
-}
+    fFragColor = vec4(normalize(vNormal_vs),1);
+};
