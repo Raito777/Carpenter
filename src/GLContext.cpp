@@ -102,15 +102,15 @@ void GLContext::drawBoids(p6::Context& ctx)
     {
         this->m_boidsContainer[i].moove();
         this->m_boidsContainer[i].checkBorder(ctx);
-        // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION (NORMALEMENT)
+        // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
         glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
-        glm::vec3 up        = glm::vec3(0.0f, 1.0f, 0.0f); // vecteur up par défaut
+        glm::vec3 up        = glm::vec3(0.0f, 1.0f, 0.0f); // boids orientés vers le haut par défaut
         glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
-        float     angle     = glm::degrees(glm::acos(glm::dot(up, direction)));
+        float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
 
         this->m_transformations.MVMatrix = glm::translate(this->m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
         this->m_transformations.MVMatrix = glm::rotate(this->m_transformations.MVMatrix, angle, axis);
-        std::cout << angle << "\n";
+
         //-------------------------------------//
         glUniform3fv(this->m_lightSetup.uKd, 1, glm::value_ptr(this->m_lightSetup._uKd[i]));
         glUniform3fv(this->m_lightSetup.uKs, 1, glm::value_ptr(this->m_lightSetup._uKs[i]));

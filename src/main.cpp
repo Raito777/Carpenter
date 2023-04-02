@@ -17,7 +17,7 @@ int main()
      *********************************/
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < 20; i++)
     {
         glm::vec3 position{p6::random::number(-ctx.aspect_ratio(), ctx.aspect_ratio()), p6::random::number(-1, 1), p6::random::number(-5, 0)};
         Boid      boid(position);
