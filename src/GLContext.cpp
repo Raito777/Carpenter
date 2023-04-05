@@ -23,7 +23,7 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 
     this->m_vbo = GLVbo();
 
-    this->setBoidsVertices(glimac::cone_vertices(0.2f, 0.1f, 16, 32));
+    this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
     glBufferData(GL_ARRAY_BUFFER, this->m_BoidVertices.size() * sizeof(glimac::ShapeVertex), this->m_BoidVertices.data(), GL_STATIC_DRAW);
 
     this->m_vbo.unBind();
@@ -49,12 +49,12 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 
     for (size_t i = 0; i < this->m_boidsContainer.size() + 1; i++)
     {
-        this->m_lightSetup._uKd.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
-        this->m_lightSetup._uKs.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
+        this->m_lightSetup._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
+        this->m_lightSetup._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
         this->m_lightSetup._uLightIntensity.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
-        this->m_lightSetup._uShininess.push_back(glm::linearRand(0.f, 1.0f));
+        this->m_lightSetup._uShininess.push_back(0.4f);
     }
-    this->m_lightSetup.light = glm::vec3(0, 1, -3);
+    this->m_lightSetup.light = glm::vec3(0, 0, -3);
 }
 
 void GLContext::initTransformations(p6::Context& ctx)
@@ -95,7 +95,7 @@ void GLContext::drawBoids(p6::Context& ctx)
     glm::vec3 uMVLightPos = glm::vec3(this->m_camera.getViewMatrix() * glm::vec4(this->m_lightSetup.light, 1));
 
     glUniform3fv(this->m_lightSetup.uLightPos_vs, 1, glm::value_ptr(uMVLightPos));
-    glUniform3fv(this->m_lightSetup.uLightIntensity, 1, glm::value_ptr(glm::vec3(2.f, 2.f, 2.f)));
+    glUniform3fv(this->m_lightSetup.uLightIntensity, 1, glm::value_ptr(glm::vec3(3.f, 3.f, 3.f)));
     glUniform3fv(this->m_lightSetup.uAmbient, 1, glm::value_ptr(glm::vec3(0.05f, 0.05f, 0.05f)));
 
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
@@ -110,6 +110,7 @@ void GLContext::drawBoids(p6::Context& ctx)
 
         this->m_transformations.MVMatrix = glm::translate(this->m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
         this->m_transformations.MVMatrix = glm::rotate(this->m_transformations.MVMatrix, angle, axis);
+        this->m_transformations.MVMatrix = glm::scale(this->m_transformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
 
         //-------------------------------------//
         glUniform3fv(this->m_lightSetup.uKd, 1, glm::value_ptr(this->m_lightSetup._uKd[i]));
