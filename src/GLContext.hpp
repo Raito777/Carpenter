@@ -54,13 +54,14 @@ private:
 public:
     TrackballCamera m_camera;
 
-    GLContext(const std::vector<Boid>& boidsContainer);
+    GLContext(const std::vector<Boid>& boidsContainer, p6::Context& ctx);
     void initTransformations(p6::Context& ctx);
     void setBoidsVertices(const std::vector<glimac::ShapeVertex>& vertices);
     void setShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
     void setShaderGlints();
     void drawBoids(p6::Context& ctx);
     void deleteBuffers();
+    void initOBJModels();
 
     // const p6::Shader GLContext::loadShaders();
 };

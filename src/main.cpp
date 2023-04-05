@@ -2,14 +2,19 @@
 #include <vector>
 #include "Boid.hpp"
 #include "GLContext.hpp"
+#include "OBJLoader.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
 #include "glm/ext.hpp"
+#include "imgui.h"
 #include "p6/p6.h"
+
+int windowWidth  = 1280;
+int windowHeight = 720;
 
 int main()
 {
-    auto ctx = p6::Context{{1280, 720, "TP3 EX1"}};
+    auto ctx = p6::Context{{windowWidth, windowHeight, "Carpenter"}};
     ctx.maximize_window();
 
     /*********************************
@@ -17,28 +22,25 @@ int main()
      *********************************/
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 5000; i++)
+    for (size_t i = 0; i < 1; i++)
     {
         glm::vec3 position{p6::random::number(-ctx.aspect_ratio(), ctx.aspect_ratio()), p6::random::number(-1, 1), p6::random::number(-5, 0)};
-        float     size = 0.05f;
+        float     size = 0.5;
         Boid      boid(position, size);
         boids.push_back(boid);
     }
 
-    GLContext glContext(boids);
+    GLContext glContext(boids, ctx);
 
-    ctx.mouse_scrolled = [&](p6::MouseScroll data) {
-        glContext.m_camera.moveFront(data.dy);
-    };
-
-    glContext.setShader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
-
-    glContext.initTransformations(ctx);
+    glContext.setShader("shaders/3D.vs.glsl", "shaders/pointlight.fs.glsl");
 
     // Declare your infinite update loop.
+
     ctx.update = [&]() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glfwSetInputMode(ctx.underlying_glfw_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glContext.drawBoids(ctx);
     };

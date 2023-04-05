@@ -12,7 +12,7 @@ private:
 public:
     glm::vec3 m_position;
     glm::vec3 m_direction = glm::vec3(p6::random::number(-0.01, 0.01), p6::random::number(-0.01, 0.01), p6::random::number(-0.01, 0.01));
-    float     m_size      = 1.f;
+    float     m_size      = 0.1f;
     Boid()
         : m_position({0, 0, -5}){};
     Boid(const glm::vec3& position, const float& size)

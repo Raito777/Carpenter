@@ -5,9 +5,9 @@
 namespace glimac {
 
 struct ShapeVertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
+    glm::fvec3 position;
+    glm::fvec3 normal;
+    glm::fvec2 texCoords;
 };
 
 } // namespace glimac

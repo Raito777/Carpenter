@@ -5,13 +5,14 @@
 #include <string_view>
 #include <vector>
 #include "Boid.hpp"
+#include "OBJLoader.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
 #include "glimac/sphere_vertices.hpp"
 #include "glm/ext.hpp"
 #include "p6/p6.h"
 
-GLContext::GLContext(const std::vector<Boid>& boidsContainer)
+GLContext::GLContext(const std::vector<Boid>& boidsContainer, p6::Context& ctx)
     : m_boidsContainer(boidsContainer)
 {
     glEnable(GL_BLEND);
@@ -23,7 +24,8 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
 
     this->m_vbo = GLVbo();
 
-    this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
+    // this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
+    this->setBoidsVertices(loadOBJ("./assets/models/cube.obj"));
     glBufferData(GL_ARRAY_BUFFER, this->m_BoidVertices.size() * sizeof(glimac::ShapeVertex), this->m_BoidVertices.data(), GL_STATIC_DRAW);
 
     this->m_vbo.unBind();
@@ -47,6 +49,8 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
     this->m_vbo.unBind();
     this->m_vao.unBind();
 
+    this->initTransformations(ctx);
+
     for (size_t i = 0; i < this->m_boidsContainer.size() + 1; i++)
     {
         this->m_lightSetup._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
@@ -55,6 +59,10 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer)
         this->m_lightSetup._uShininess.push_back(0.4f);
     }
     this->m_lightSetup.light = glm::vec3(0, 0, -3);
+
+    ctx.mouse_scrolled = [&](p6::MouseScroll data) {
+        this->m_camera.moveFront(data.dy);
+    };
 }
 
 void GLContext::initTransformations(p6::Context& ctx)
@@ -135,4 +143,8 @@ void GLContext::setShader(const std::string& vertexShaderPath, const std::string
 {
     this->m_shader = p6::load_shader(vertexShaderPath, fragmentShaderPath);
     this->setShaderGlints();
+}
+
+void GLContext::initOBJModels()
+{
 }
