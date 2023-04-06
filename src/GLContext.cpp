@@ -25,7 +25,7 @@ GLContext::GLContext(const std::vector<Boid>& boidsContainer, p6::Context& ctx)
     this->m_vbo = GLVbo();
 
     // this->setBoidsVertices(glimac::cone_vertices(1.f, 0.5f, 16, 32));
-    this->setBoidsVertices(loadOBJ("./assets/models/cube.obj"));
+    this->setBoidsVertices(loadOBJ("./assets/models/bat2.obj"));
     glBufferData(GL_ARRAY_BUFFER, this->m_BoidVertices.size() * sizeof(glimac::ShapeVertex), this->m_BoidVertices.data(), GL_STATIC_DRAW);
 
     this->m_vbo.unBind();
@@ -89,6 +89,8 @@ void GLContext::setShaderGlints()
     this->m_lightSetup.uLightPos_vs    = glGetUniformLocation(m_shader.id(), "uLightPos_vs");
     this->m_lightSetup.uLightIntensity = glGetUniformLocation(m_shader.id(), "uLightIntensity");
 }
+// class renderer qui permet de choisir quoi rendre
+// Struct scene avec les lumières les objets et leurs transformations et on donne ça au renderer
 void GLContext::drawBoids(p6::Context& ctx)
 {
     // this->m_camera.moveFront(0.1f);
@@ -104,7 +106,7 @@ void GLContext::drawBoids(p6::Context& ctx)
 
     glUniform3fv(this->m_lightSetup.uLightPos_vs, 1, glm::value_ptr(uMVLightPos));
     glUniform3fv(this->m_lightSetup.uLightIntensity, 1, glm::value_ptr(glm::vec3(3.f, 3.f, 3.f)));
-    glUniform3fv(this->m_lightSetup.uAmbient, 1, glm::value_ptr(glm::vec3(0.05f, 0.05f, 0.05f)));
+    glUniform3fv(this->m_lightSetup.uAmbient, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
 
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
@@ -112,7 +114,7 @@ void GLContext::drawBoids(p6::Context& ctx)
         this->m_boidsContainer[i].checkBorder(ctx);
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
         glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
-        glm::vec3 up        = glm::vec3(0.0f, 1.0f, 0.0f); // boids orientés vers le haut par défaut
+        glm::vec3 up        = glm::vec3(0.0f, 0.0f, 1.0f); // boids orientés vers le haut par défaut
         glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
         float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
 

@@ -88,38 +88,70 @@ static std::vector<glimac::ShapeVertex> loadOBJ(const char* fileName)
 
         else if (prefix == "f")
         {
-            int counter = 0;
-            while (ss >> tempGLint)
+            std::vector<std::string> faceTokens;
+            std::string              token;
+            while (ss >> token)
             {
-                // pushing indecies into correct arrays
+                // pushing indices into correct arrays
+                faceTokens.push_back(token);
+            }
+            // split each token into its constituent parts
+            std::vector<std::vector<std::string>> vertexTokens(faceTokens.size());
+            for (size_t i = 0; i < faceTokens.size(); i++)
+            {
+                std::istringstream vertexIss(faceTokens[i]);
+                std::string        indexToken;
+                while (std::getline(vertexIss, indexToken, '/'))
+                {
+                    vertexTokens[i].push_back(indexToken);
+                }
+            }
 
-                if (counter == 0)
+            // generate triangles for the face
+            if (vertexTokens.size() == 3) // triangle
+            {
+                for (size_t i = 0; i < vertexTokens.size(); i++)
                 {
-                    vertexPositionIndicies.push_back(tempGLint);
+                    GLuint positionIndex = std::stoi(vertexTokens[i][0]) - 1;
+                    GLuint texcoordIndex = 0;
+                    if (vertexTokens[i].size() >= 2 && !vertexTokens[i][1].empty())
+                    {
+                        texcoordIndex = std::stoi(vertexTokens[i][1]) - 1;
+                    }
+                    GLuint normalIndex = 0;
+                    if (vertexTokens[i].size() >= 3 && !vertexTokens[i][2].empty())
+                    {
+                        normalIndex = std::stoi(vertexTokens[i][2]) - 1;
+                    }
+                    vertexPositionIndicies.push_back(positionIndex);
+                    vertexTexCoordIndicies.push_back(texcoordIndex);
+                    vertexNormalIndicies.push_back(normalIndex);
                 }
-                else if (counter == 1)
+            }
+            else if (vertexTokens.size() == 4) // quad
+            {
+                GLuint indicesArray[6] = {0, 1, 2, 2, 3, 0}; // triangle strip to draw quad
+                for (size_t i = 0; i < 6; i++)
                 {
-                    vertexTexCoordIndicies.push_back(tempGLint);
+                    GLuint index         = std::stoi(vertexTokens[indicesArray[i]][0]) - 1;
+                    GLuint texcoordIndex = 0;
+                    if (vertexTokens[indicesArray[i]].size() >= 2 && !vertexTokens[indicesArray[i]][1].empty())
+                    {
+                        texcoordIndex = std::stoi(vertexTokens[indicesArray[i]][1]) - 1;
+                    }
+                    GLuint normalIndex = 0;
+                    if (vertexTokens[indicesArray[i]].size() >= 3 && !vertexTokens[indicesArray[i]][2].empty())
+                    {
+                        normalIndex = std::stoi(vertexTokens[indicesArray[i]][2]) - 1;
+                    }
+                    vertexPositionIndicies.push_back(index);
+                    vertexTexCoordIndicies.push_back(texcoordIndex);
+                    vertexNormalIndicies.push_back(normalIndex);
                 }
-                else if (counter == 2)
-                {
-                    vertexNormalIndicies.push_back(tempGLint);
-                }
-                // andling characters;
-                if (ss.peek() == '/')
-                {
-                    counter++;
-                    ss.ignore(1, '/');
-                }
-                else if (ss.peek() == ' ')
-                {
-                    counter++;
-                    ss.ignore(1, ' ');
-                }
-                if (counter > 2)
-                {
-                    counter = 0;
-                }
+            }
+            else
+            {
+                std::cerr << "Face avec un nombre d'indices invalide" << std::endl;
             }
         }
 
@@ -130,24 +162,24 @@ static std::vector<glimac::ShapeVertex> loadOBJ(const char* fileName)
     // build final shapeVertex;
     vertices.resize(vertexPositionIndicies.size(), glimac::ShapeVertex());
 
-    for (size_t i = 0; i < vertexPositions.size(); i++)
-    {
-        std::cout << vertexPositions[i].x << " " << vertexPositions[i].y << " " << vertexPositions[i].z << "\n";
-    }
-    for (size_t i = 0; i < vertexPositionIndicies.size(); i++)
-    {
-        std::cout << vertexPositionIndicies[i] << "\n";
-    }
+    // for (size_t i = 0; i < vertexPositions.size(); i++)
+    // {
+    //     std::cout << vertexPositions[i].x << " " << vertexPositions[i].y << " " << vertexPositions[i].z << "\n";
+    // }
+    // for (size_t i = 0; i < vertexPositionIndicies.size(); i++)
+    // {
+    //     std::cout << vertexPositionIndicies[i] << "\n";
+    // }
     for (size_t i = 0; i < vertices.size(); i++)
     {
-        vertices[i].position = vertexPositions[vertexPositionIndicies[i] - 1];
-        // vertices[i].normal    = vertexNormals[vertexNormalIndicies[i] - 1];
-        // vertices[i].texCoords = vertexTexCoords[vertexTexCoordIndicies[i] - 1];
+        vertices[i].position  = vertexPositions[vertexPositionIndicies[i]];
+        vertices[i].normal    = vertexNormals[vertexNormalIndicies[i]];
+        vertices[i].texCoords = vertexTexCoords[vertexTexCoordIndicies[i]];
         // std::cout << vertexPositionIndicies[i] << "\n";
     }
 
-    std::cout << "Nb of vertices: " << vertexNormals.size() << "\n";
-    std::cout << "Nb of indicies pos : " << vertexNormalIndicies.size() << "\n";
+    std::cout << "Nb of vertices: " << vertices.size() << "\n";
+    std::cout << "Nb of indicies pos : " << vertexPositionIndicies.size() << "\n";
     std::cout << "Nb of indicies normals : " << vertexNormalIndicies.size() << "\n";
 
     std::cout << "OBJ file loaded!"

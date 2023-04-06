@@ -24,7 +24,7 @@ struct shaderGlints {
     GLint uMVMatrix;
     GLint uNormalMatrix;
 };
-
+// std variants pour stocker les lumières positional directional
 struct lightSetup {
     GLint uAmbient;
     GLint uKd;
