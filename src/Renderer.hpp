@@ -19,6 +19,8 @@ public:
 
     Renderer(p6::Context& ctx)
     {
-        this->m_scene = Scene(ctx, this->m_shader);
+        this->m_scene = Scene(ctx, this->m_shader.id());
     }
+
+    void render();
 };

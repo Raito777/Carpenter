@@ -17,11 +17,11 @@ struct sceneLightSetup {
     glm::vec3 _lightPos;
     glm::vec3 _uAmbient;
 
-    void initLightGlints(const p6::Shader& shader)
+    void initLightGlints(const unsigned int shaderId)
     {
-        this->uLightPos_vs    = glGetUniformLocation(shader.id(), "uLightPos_vs");
-        this->uLightIntensity = glGetUniformLocation(shader.id(), "uLightIntensity");
-        this->uAmbient        = glGetUniformLocation(shader.id(), "uKa");
+        this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs");
+        this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity");
+        this->uAmbient        = glGetUniformLocation(shaderId, "uKa");
     }
 };
 
@@ -34,11 +34,11 @@ struct lightTexture {
     std::vector<glm::vec3> _uKs;
     std::vector<float>     _uShininess;
 
-    void initLightTexture(const p6::Shader& shader)
+    void initLightTexture(const unsigned int shaderId)
     {
-        this->uKd        = glGetUniformLocation(shader.id(), "uKd");
-        this->uKs        = glGetUniformLocation(shader.id(), "uKs");
-        this->uShininess = glGetUniformLocation(shader.id(), "uShininess");
+        this->uKd        = glGetUniformLocation(shaderId, "uKd");
+        this->uKs        = glGetUniformLocation(shaderId, "uKs");
+        this->uShininess = glGetUniformLocation(shaderId, "uShininess");
     }
 };
 
@@ -51,11 +51,11 @@ struct modelTransformations {
     GLint uMVMatrix;
     GLint uNormalMatrix;
 
-    void initModelTransformations(p6::Context& ctx, const p6::Shader& shader)
+    void initModelTransformations(p6::Context& ctx, const unsigned int shaderId)
     {
-        this->uMVPMatrix    = glGetUniformLocation(shader.id(), "uMVPMatrix");
-        this->uMVMatrix     = glGetUniformLocation(shader.id(), "uMVMatrix");
-        this->uNormalMatrix = glGetUniformLocation(shader.id(), "uNormalMatrix");
+        this->uMVPMatrix    = glGetUniformLocation(shaderId, "uMVPMatrix");
+        this->uMVMatrix     = glGetUniformLocation(shaderId, "uMVMatrix");
+        this->uNormalMatrix = glGetUniformLocation(shaderId, "uNormalMatrix");
         this->ProjMatrix    = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
         this->MVMatrix      = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
         this->NormalMatrix  = glm::transpose(glm::inverse(this->MVMatrix));
@@ -75,7 +75,7 @@ public:
     std::vector<sceneLightSetup> m_lights;
     TrackballCamera              m_camera;
     Scene();
-    Scene(p6::Context& ctx, p6::Shader shader)
+    Scene(p6::Context& ctx, const unsigned int shaderId)
     {
         this->m_boidModel        = loadOBJ("./assets/models/bat2.obj");
         this->m_environmentModel = loadOBJ("./assets/models/CaveRock_L_Obj.obj");
@@ -89,10 +89,10 @@ public:
 
         for (size_t i = 0; i < this->m_lights.size(); i++)
         {
-            this->m_lights[i].initLightGlints(shader);
+            this->m_lights[i].initLightGlints(shaderId);
         }
 
-        m_boidsTransformations.initModelTransformations(ctx, shader);
-        m_environmentTransformations.initModelTransformations(ctx, shader);
+        m_boidsTransformations.initModelTransformations(ctx, shaderId);
+        m_environmentTransformations.initModelTransformations(ctx, shaderId);
     };
 };
