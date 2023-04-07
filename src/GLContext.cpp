@@ -146,7 +146,3 @@ void GLContext::setShader(const std::string& vertexShaderPath, const std::string
     this->m_shader = p6::load_shader(vertexShaderPath, fragmentShaderPath);
     this->setShaderGlints();
 }
-
-void GLContext::initOBJModels()
-{
-}

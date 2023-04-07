@@ -1,0 +1,11 @@
+# Created with Anim8or 1.00
+# Object "CaveRock_L":
+
+newmtl CaveRock_L_Base
+Ka 0.18 0.18 0.18
+Kd 0.569 0.569 0.569
+Ks 0.686 0.686 0.686
+Ns 738.6
+map_Kd CaveRock_L_Base_Diffuse.png
+map_Ks CaveRock_L_Base_Specular.png
+

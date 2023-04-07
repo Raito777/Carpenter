@@ -27,7 +27,7 @@ public:
         this->setLightGlints(shader);
     }
 
-    void setupTexture()
+    void setupObject()
     {
         this->_uKd.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
         this->_uKs.push_back(glm::vec3(glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f), glm::linearRand(0.f, 1.0f)));
