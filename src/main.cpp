@@ -3,6 +3,8 @@
 #include "Boid.hpp"
 #include "GLContext.hpp"
 #include "OBJLoader.hpp"
+#include "Renderer.hpp"
+#include "Scene.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
 #include "glm/ext.hpp"
@@ -47,4 +49,6 @@ int main()
     glContext.deleteBuffers();
     //  Should be done last. It starts the infinite loop.
     ctx.start();
+
+    return 0;
 }
