@@ -71,6 +71,7 @@ public:
 
     std::vector<glimac::ShapeVertex> m_environmentModel;
     modelTransformations             m_environmentTransformations;
+    lightTexture                     m_environmentLightTexture;
 
     std::vector<sceneLightSetup> m_lights;
     TrackballCamera              m_camera;
@@ -96,5 +97,13 @@ public:
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
+
+        this->m_boidLightTexture._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
+        this->m_boidLightTexture._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
+        this->m_boidLightTexture._uShininess.push_back(0.4f);
+
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 1.f));
+        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));
+        this->m_environmentLightTexture._uShininess.push_back(0.4f);
     };
 };

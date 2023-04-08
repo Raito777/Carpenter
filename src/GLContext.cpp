@@ -98,7 +98,6 @@ void GLContext::drawBoids(p6::Context& ctx)
     this->m_camera.rotateLeft(ctx.mouse_delta().y * movementStrength);
     this->m_camera.rotateUp(ctx.mouse_delta().x * movementStrength);
 
-    ctx.mouse() = {0, 0};
     this->m_shader.use();
     this->m_vao.bind();
 
