@@ -3,7 +3,6 @@
 GLVbo::GLVbo()
 {
     glGenBuffers(1, &this->vbo);
-    this->bind();
 }
 
 void GLVbo::bind()

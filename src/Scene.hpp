@@ -74,7 +74,9 @@ public:
 
     std::vector<sceneLightSetup> m_lights;
     TrackballCamera              m_camera;
+
     Scene();
+
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
         this->m_boidModel        = loadOBJ("./assets/models/bat2.obj");
