@@ -81,7 +81,7 @@ public:
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
         this->m_boidModel        = loadOBJ("./assets/models/bat2.obj");
-        this->m_environmentModel = loadOBJ("./assets/models/CaveRock_L_Obj.obj");
+        this->m_environmentModel = loadOBJ("./assets/models/modular-cube.obj");
 
         sceneLightSetup aLight;
         aLight._lightPos        = glm::vec3(0, 0, -3);
@@ -103,7 +103,7 @@ public:
 
         this->m_boidLightTexture._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
         this->m_boidLightTexture._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
-        this->m_boidLightTexture._uShininess.push_back(0.4f);
+        this->m_boidLightTexture._uShininess.push_back(1.f);
 
         this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 1.f));
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));

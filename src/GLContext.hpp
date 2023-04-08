@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 #include "Boid.hpp"
+#include "Environment.hpp"
 #include "GLVao.hpp"
 #include "GLVbo.hpp"
 #include "Renderer.hpp"
@@ -20,7 +21,7 @@ private:
     Renderer m_renderer;
 
 public:
-    GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);
+    GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer, Environment environment);
     void draw(p6::Context& ctx);
     void deleteBuffers();
 

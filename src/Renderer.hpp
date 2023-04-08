@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <vector>
 #include "Boid.hpp"
+#include "Environment.hpp"
 #include "GLVao.hpp"
 #include "GLVbo.hpp"
 #include "OBJLoader.hpp"
@@ -27,10 +28,11 @@ private:
 
 public:
     std::vector<Boid> m_boidsContainer;
+    Environment       m_environment;
     Scene             m_scene;
 
     Renderer(){};
-    Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer);
+    Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer, Environment environment);
 
     void render(p6::Context& ctx);
     void deleteBuffers();

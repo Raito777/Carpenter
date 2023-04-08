@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 #include "Boid.hpp"
+#include "Environment.hpp"
 #include "OBJLoader.hpp"
 #include "Renderer.hpp"
 #include "Scene.hpp"
@@ -14,12 +15,12 @@
 #include "glm/ext.hpp"
 #include "p6/p6.h"
 
-GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer)
+GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer, Environment environment)
 {
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 
-    this->m_renderer = Renderer(ctx, boidsContainer);
+    this->m_renderer = Renderer(ctx, boidsContainer, environment);
 
     ctx.mouse_scrolled = [&](p6::MouseScroll data) {
         this->m_renderer.m_scene.m_camera.moveFront(data.dy);
