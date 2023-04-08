@@ -17,7 +17,6 @@
 
 class GLContext {
 private:
-    GLVao    m_vao;
     Renderer m_renderer;
 
 public:
