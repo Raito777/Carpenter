@@ -8,6 +8,7 @@
 #include "GLVbo.hpp"
 #include "OBJLoader.hpp"
 #include "Scene.hpp"
+#include "ShadowMapFBO.hpp"
 #include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
 #include "glm/fwd.hpp"
@@ -19,9 +20,14 @@ private:
     GLVbo      m_vboEnvironment;
     GLVao      m_vaoBoids;
     GLVao      m_vaoEnvironment;
-    p6::Shader m_shader = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
+    p6::Shader m_shader           = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
+    p6::Shader m_shadowShader     = p6::load_shader("shaders/shadow.vs.glsl", "shaders/shadow.fs.glsl");
+    float      valueOrtho         = 25.f;
+    glm::mat4  shadowOrthoProjMat = glm::ortho(-valueOrtho, valueOrtho, -valueOrtho, valueOrtho, -valueOrtho, valueOrtho);
 
-    void renderLights();
+    ShadowMapFBO m_shadowMap;
+
+    void renderLights(p6::Context& ctx);
     void renderCamera(p6::Context& ctx);
     void renderBoids(p6::Context& ctx);
     void renderEnvironment(p6::Context& ctx);

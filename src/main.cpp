@@ -6,14 +6,17 @@
 #include "OBJLoader.hpp"
 #include "Renderer.hpp"
 #include "Scene.hpp"
+#include "ShadowMapFBO.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
 #include "glm/ext.hpp"
 #include "imgui.h"
 #include "p6/p6.h"
 
-int windowWidth  = 1280;
-int windowHeight = 720;
+int const windowWidth  = 1280;
+int const windowHeight = 720;
+
+
 
 int main()
 {
@@ -27,14 +30,12 @@ int main()
 
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 100; i++)
+    for (size_t i = 0; i < 1000; i++)
     {
         glm::vec3 position{p6::random::number(-environment.m_sizeX, environment.m_sizeX), p6::random::number(-environment.m_sizeY, environment.m_sizeY), p6::random::number(-environment.m_sizeZ, environment.m_sizeZ)};
-
-        // glm::vec3 position{0, 0, -3};
-
-        float size = 0.001f;
-        Boid  boid(position, size);
+        float     size = 0.001f;
+        // float size = 0.1f;
+        Boid boid(position, size);
         boids.push_back(boid);
     }
 

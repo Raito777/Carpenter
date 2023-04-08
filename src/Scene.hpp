@@ -5,23 +5,38 @@
 #include "OBJLoader.hpp"
 #include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
+#include "glimac/cone_vertices.hpp"
 #include "glm/fwd.hpp"
 #include "p6/p6.h"
 
 struct sceneLightSetup {
     GLint uLightPos_vs;
+    GLint uLightDir_vs;
+
+    GLint uMVPLight;
+
     GLint uLightIntensity;
     GLint uAmbient;
 
     glm::vec3 _uLightIntensity;
     glm::vec3 _lightPos;
+    glm::vec3 _lightDir;
+
     glm::vec3 _uAmbient;
 
-    void initLightGlints(const unsigned int shaderId)
+    void initPointLightGlints(const unsigned int shaderId)
     {
-        this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs");
-        this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity");
-        this->uAmbient        = glGetUniformLocation(shaderId, "uKa");
+        this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs_Light1");
+        this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light1");
+        this->uAmbient        = glGetUniformLocation(shaderId, "uKa_Light1");
+        this->uMVPLight       = glGetUniformLocation(shaderId, "uMVPLight");
+    }
+
+    void initDirLightGlints(const unsigned int shaderId)
+    {
+        this->uLightDir_vs    = glGetUniformLocation(shaderId, "uLightDir_vs_Light2");
+        this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light2");
+        this->uMVPLight       = glGetUniformLocation(shaderId, "uMVPLight");
     }
 };
 
@@ -65,6 +80,9 @@ struct modelTransformations {
 class Scene {
 private:
 public:
+    int shadow_width  = 4096;
+    int shadow_height = 4096;
+
     std::vector<glimac::ShapeVertex> m_boidModel;
     modelTransformations             m_boidsTransformations;
     lightTexture                     m_boidLightTexture;
@@ -73,27 +91,28 @@ public:
     modelTransformations             m_environmentTransformations;
     lightTexture                     m_environmentLightTexture;
 
-    std::vector<sceneLightSetup> m_lights;
-    TrackballCamera              m_camera;
+    sceneLightSetup m_pointLight;
+    sceneLightSetup m_dirLight;
+
+    TrackballCamera m_camera;
 
     Scene(){};
 
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
-        this->m_boidModel        = loadOBJ("./assets/models/bat2.obj");
-        this->m_environmentModel = loadOBJ("./assets/models/modular-cube.obj");
+        this->m_boidModel = loadOBJ("./assets/models/bat2.obj");
+        // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
+        this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
-        sceneLightSetup aLight;
-        aLight._lightPos        = glm::vec3(0, 0, -3);
-        aLight._uLightIntensity = glm::vec3(3.f, 3.f, 3.f);
-        aLight._uAmbient        = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
+        m_pointLight._uLightIntensity = glm::vec3(5.f, 5.f, 5.f);
+        m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
-        this->m_lights.push_back(aLight);
+        m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
+        m_dirLight._uLightIntensity = glm::vec3(0.2f, 0.2f, 0.2f);
 
-        for (size_t i = 0; i < this->m_lights.size(); i++)
-        {
-            this->m_lights[i].initLightGlints(shaderId);
-        }
+        m_pointLight.initPointLightGlints(shaderId);
+        m_dirLight.initDirLightGlints(shaderId);
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);

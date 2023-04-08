@@ -52,13 +52,26 @@ Renderer::Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer, Environme
 
     this->m_vboEnvironment.unBind();
     this->m_vaoEnvironment.unBind();
+
+    this->m_shadowMap.Init(this->m_scene.shadow_width, this->m_scene.shadow_height);
+
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    float factor = 1.f;
+    float units  = 1.f;
+    glPolygonOffset(factor, units);
 }
 
 void Renderer::render(p6::Context& ctx)
 {
+    this->m_shadowMap.BindForWriting();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    this->m_shadowShader.use();
+
     this->m_shader.use();
     this->renderCamera(ctx);
-    this->renderLights();
+    this->renderLights(ctx);
     this->m_vaoEnvironment.bind();
     this->renderEnvironment(ctx);
     this->m_vaoEnvironment.unBind();
@@ -67,18 +80,18 @@ void Renderer::render(p6::Context& ctx)
     this->m_vaoBoids.unBind();
 }
 
-void Renderer::renderLights()
+void Renderer::renderLights(p6::Context& ctx)
 {
-    std::vector<glm::vec3> uMVLightsPos(this->m_scene.m_lights.size());
+    glm::vec3 uMVLightsPos;
 
-    for (size_t i = 0; i < this->m_scene.m_lights.size(); i++)
-    {
-        uMVLightsPos[i] = glm::vec3(this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_lights[i]._lightPos, 1));
+    this->m_scene.m_pointLight._lightPos = glm::vec3(glm::sin(ctx.time()) * 3, 0, -0.5);
+    uMVLightsPos                         = glm::vec3(this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
+    glUniform3fv(this->m_scene.m_pointLight.uLightPos_vs, 1, glm::value_ptr(uMVLightsPos));
+    glUniform3fv(this->m_scene.m_pointLight.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_pointLight._uLightIntensity));
+    glUniform3fv(this->m_scene.m_pointLight.uAmbient, 1, glm::value_ptr(this->m_scene.m_pointLight._uAmbient));
 
-        glUniform3fv(this->m_scene.m_lights[i].uLightPos_vs, 1, glm::value_ptr(uMVLightsPos[i]));
-        glUniform3fv(this->m_scene.m_lights[i].uLightIntensity, 1, glm::value_ptr(glm::vec3(3.f, 3.f, 3.f)));
-        glUniform3fv(this->m_scene.m_lights[i].uAmbient, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
-    }
+    glUniform3fv(this->m_scene.m_dirLight.uLightDir_vs, 1, glm::value_ptr(this->m_scene.m_dirLight._lightDir));
+    glUniform3fv(this->m_scene.m_dirLight.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_dirLight._uLightIntensity));
 }
 
 void Renderer::renderCamera(p6::Context& ctx)
@@ -108,6 +121,8 @@ void Renderer::renderBoids(p6::Context& ctx)
         this->m_scene.m_boidsTransformations.MVMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MVMatrix, angle, axis);
         this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
 
+        glUniformMatrix4fv(this->m_scene.m_dirLight.uMVPLight, 1, GL_FALSE, glm::value_ptr(this->shadowOrthoProjMat * this->m_scene.m_boidsTransformations.MVMatrix));
+
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.ProjMatrix * this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.NormalMatrix));
@@ -119,6 +134,8 @@ void Renderer::renderBoids(p6::Context& ctx)
 void Renderer::renderEnvironment(p6::Context& ctx)
 {
     this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_environment.m_position);
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+
     this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_environment.m_sizeX, this->m_environment.m_sizeY, this->m_environment.m_sizeZ));
 
     glUniform3fv(this->m_scene.m_environmentLightTexture.uKd, 1, glm::value_ptr(this->m_scene.m_environmentLightTexture._uKd[0]));
