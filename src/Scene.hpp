@@ -57,7 +57,7 @@ struct modelTransformations {
         this->uMVMatrix     = glGetUniformLocation(shaderId, "uMVMatrix");
         this->uNormalMatrix = glGetUniformLocation(shaderId, "uNormalMatrix");
         this->ProjMatrix    = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
-        this->MVMatrix      = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+        this->MVMatrix      = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2));
         this->NormalMatrix  = glm::transpose(glm::inverse(this->MVMatrix));
     }
 };
@@ -76,7 +76,7 @@ public:
     std::vector<sceneLightSetup> m_lights;
     TrackballCamera              m_camera;
 
-    Scene();
+    Scene(){};
 
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
@@ -98,12 +98,15 @@ public:
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
 
+        m_boidLightTexture.initLightTexture(shaderId);
+        m_environmentLightTexture.initLightTexture(shaderId);
+
         this->m_boidLightTexture._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
         this->m_boidLightTexture._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
         this->m_boidLightTexture._uShininess.push_back(0.4f);
 
         this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 1.f));
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));
-        this->m_environmentLightTexture._uShininess.push_back(0.4f);
+        this->m_environmentLightTexture._uShininess.push_back(1.f);
     };
 };

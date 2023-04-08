@@ -24,17 +24,17 @@ int main()
      *********************************/
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 1000; i++)
+    for (size_t i = 0; i < 50; i++)
     {
         glm::vec3 position{p6::random::number(-ctx.aspect_ratio(), ctx.aspect_ratio()), p6::random::number(-1, 1), p6::random::number(-5, 0)};
-        float     size = 0.001f;
-        Boid      boid(position, size);
+        // glm::vec3 position{0, 0, -3};
+
+        float size = 0.0005f;
+        Boid  boid(position, size);
         boids.push_back(boid);
     }
 
-    GLContext glContext(boids, ctx);
-
-    glContext.setShader("shaders/3D.vs.glsl", "shaders/pointlight.fs.glsl");
+    GLContext glContext(ctx, boids);
 
     // Declare your infinite update loop.
 
@@ -44,7 +44,7 @@ int main()
 
         glfwSetInputMode(ctx.underlying_glfw_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-        glContext.drawBoids(ctx);
+        glContext.draw(ctx);
     };
     glContext.deleteBuffers();
     //  Should be done last. It starts the infinite loop.

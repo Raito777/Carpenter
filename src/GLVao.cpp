@@ -3,7 +3,6 @@
 GLVao::GLVao()
 {
     glGenVertexArrays(1, &this->vao);
-    this->bind();
 }
 
 void GLVao::bind()
