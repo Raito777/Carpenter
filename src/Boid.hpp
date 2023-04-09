@@ -13,7 +13,9 @@ private:
 public:
     glm::vec3 m_position;
     glm::vec3 m_direction = glm::vec3(p6::random::number(-1, 1), p6::random::number(-1, 1), p6::random::number(-1, 1));
-    float     m_size      = 0.1f;
+    float     m_speed     = 2.f;
+
+    float m_size = 0.1f;
     Boid()
         : m_position({0, 0, -5}){};
     Boid(const glm::vec3& position, const float& size)
@@ -21,33 +23,33 @@ public:
 
     void moove(p6::Context& ctx)
     {
-        this->m_position += this->m_direction * ctx.delta_time();
+        this->m_position += this->m_direction * this->m_speed * ctx.delta_time();
     }
 
     void checkBorder(p6::Context& ctx, Environment environment)
     {
         // c'est pas mal avec ces valeurs
-        if (this->m_position.x > environment.m_sizeX - 1.5)
+        if (this->m_position.x > environment.m_sizeX - 2)
         {
             this->m_direction.x += -0.02f;
         }
-        if (this->m_position.y > environment.m_sizeY - 1.5)
+        if (this->m_position.y > environment.m_sizeY - 2)
         {
             this->m_direction.y += -0.02f;
         }
-        if (this->m_position.x < -environment.m_sizeX + 1.5)
+        if (this->m_position.x < -environment.m_sizeX + 2)
         {
             this->m_direction.x += 0.02f;
         }
-        if (this->m_position.y < -environment.m_sizeY + 1.5)
+        if (this->m_position.y < -environment.m_sizeY + 2)
         {
             this->m_direction.y += 0.02f;
         }
-        if (this->m_position.z < -environment.m_sizeZ + 1.5)
+        if (this->m_position.z < -environment.m_sizeZ + 2)
         {
             this->m_direction.z += 0.02f;
         }
-        if (this->m_position.z > environment.m_sizeZ - 1.5)
+        if (this->m_position.z > environment.m_sizeZ - 2)
         {
             this->m_direction.z += -0.02f;
         }

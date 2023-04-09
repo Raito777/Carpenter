@@ -1,6 +1,6 @@
-#include <random>
 #include <vector>
 #include "Boid.hpp"
+#include "Character.hpp"
 #include "Environment.hpp"
 #include "GLContext.hpp"
 #include "OBJLoader.hpp"
@@ -37,7 +37,7 @@ int main()
         boids.push_back(boid);
     }
 
-    GLContext glContext(ctx, boids, environment);
+    GLContext glContext(ctx, boids);
 
     // Declare your infinite update loop.
 
@@ -46,6 +46,7 @@ int main()
 
         glContext.draw(ctx);
     };
+
     glContext.deleteBuffers();
     //  Should be done last. It starts the infinite loop.
     ctx.start();

@@ -41,15 +41,18 @@ struct CameraDirection {
 
 class Renderer {
 private:
-    GLVbo                        m_vboBoids;
-    GLVbo                        m_vboEnvironment;
-    GLVao                        m_vaoBoids;
-    GLVao                        m_vaoEnvironment;
+    GLVbo m_vboBoids;
+    GLVbo m_vboEnvironment;
+    GLVbo m_vboCharacter;
+
+    GLVao m_vaoBoids;
+    GLVao m_vaoEnvironment;
+    GLVao m_vaoCharacter;
+
     p6::Shader                   m_shader     = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
-    float                        m_aspect     = this->m_scene.shadow_width / this->m_scene.shadow_width;
-    float                        m_near       = 1.0f;
-    float                        m_far        = 25.0f;
-    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.0f), m_aspect, m_near, m_far);
+    float                        m_near       = 0.1f;
+    float                        m_far        = 30.0f;
+    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.f), 4096 / static_cast<float>(4096), m_near, m_far);
     std::vector<glm::mat4>       m_shadowTransforms;
     ShadowProgram                m_shadowProgram;
     ShadowCubeMapFBO             m_shadowCubeMap;
@@ -62,14 +65,14 @@ private:
     void renderBoidsShadows(p6::Context& ctx);
     void renderEnvironment(p6::Context& ctx);
     void renderEnvironmentShadows(p6::Context& ctx);
+    void renderCharacter(p6::Context& ctx);
 
 public:
     std::vector<Boid> m_boidsContainer;
-    Environment       m_environment;
     Scene             m_scene;
 
     Renderer(){};
-    Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer, Environment environment);
+    Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer);
 
     void render(p6::Context& ctx);
     void deleteBuffers();

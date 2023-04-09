@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 #include <vector>
+#include "Character.hpp"
+#include "Environment.hpp"
 #include "OBJLoader.hpp"
 #include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
@@ -93,6 +95,13 @@ public:
     modelTransformations             m_environmentTransformations;
     lightTexture                     m_environmentLightTexture;
 
+    std::vector<glimac::ShapeVertex> m_characterModel;
+    modelTransformations             m_characterTransformations;
+    lightTexture                     m_characterLightTexture;
+
+    Environment m_environment;
+    Character   m_character;
+
     sceneLightSetup m_pointLight;
     sceneLightSetup m_dirLight;
 
@@ -106,21 +115,27 @@ public:
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
+        this->m_characterModel = loadOBJ("./assets/models/modular-cube.obj");
+
+        m_environment = Environment(20, 10, 10);
+
         m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
         m_pointLight._uLightIntensity = glm::vec3(100.f, 100.f, 100.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
-        m_dirLight._uLightIntensity = glm::vec3(0.9f, 0.9f, 0.9f);
+        m_dirLight._uLightIntensity = glm::vec3(1.9f, 1.9f, 1.9f);
 
         m_pointLight.initPointLightGlints(shaderId);
         m_dirLight.initDirLightGlints(shaderId);
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
+        m_characterTransformations.initModelTransformations(ctx, shaderId);
 
         m_boidLightTexture.initLightTexture(shaderId);
         m_environmentLightTexture.initLightTexture(shaderId);
+        m_characterLightTexture.initLightTexture(shaderId);
 
         this->m_boidLightTexture._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
         this->m_boidLightTexture._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
@@ -129,6 +144,10 @@ public:
         this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 1.f));
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));
         this->m_environmentLightTexture._uShininess.push_back(1.f);
+
+        this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 1.f, 0.f));
+        this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 1.f, 0.f));
+        this->m_characterLightTexture._uShininess.push_back(1.f);
     };
 
     void updateGlints(p6::Context& ctx, const unsigned int shaderId)
@@ -138,8 +157,10 @@ public:
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
+        m_characterTransformations.initModelTransformations(ctx, shaderId);
 
         m_boidLightTexture.initLightTexture(shaderId);
         m_environmentLightTexture.initLightTexture(shaderId);
+        m_characterLightTexture.initLightTexture(shaderId);
     }
 };

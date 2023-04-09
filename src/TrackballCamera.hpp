@@ -6,7 +6,7 @@
 class TrackballCamera {
 public:
     TrackballCamera()
-        : m_fDistance(0), m_fAngleX(0.f), m_fAngleY(0.f){};
+        : m_fDistance(-3), m_fAngleX(0.f), m_fAngleY(0.f){};
 
     void moveFront(float delta)
     {
@@ -29,6 +29,16 @@ public:
         MVMatrix = glm::rotate(MVMatrix, glm::radians(this->m_fAngleY), glm::vec3(0, 1, 0));
 
         return MVMatrix;
+    }
+
+    float getAngleY() const
+    {
+        return m_fAngleY;
+    }
+
+    float getAngleX() const
+    {
+        return m_fAngleY;
     }
 
 private:

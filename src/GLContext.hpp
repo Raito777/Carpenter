@@ -19,9 +19,13 @@
 class GLContext {
 private:
     Renderer m_renderer;
+    bool     Z = false;
+    bool     Q = false;
+    bool     S = false;
+    bool     D = false;
 
 public:
-    GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer, Environment environment);
+    GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);
     void draw(p6::Context& ctx);
     void deleteBuffers();
 

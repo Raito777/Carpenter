@@ -10,9 +10,9 @@
 class Environment {
 private:
 public:
-    float m_sizeX = 3.f;
-    float m_sizeY = 1.5f;
-    float m_sizeZ = 3.f;
+    float m_sizeX = 5.f;
+    float m_sizeY = 2.5f;
+    float m_sizeZ = 2.5f;
 
     glm::vec3 m_position = glm::vec3(0, 0, 0);
 
