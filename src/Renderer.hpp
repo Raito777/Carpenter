@@ -4,6 +4,7 @@
 #include <vector>
 #include "Boid.hpp"
 #include "Environment.hpp"
+#include "FreeflyCamera.hpp"
 #include "GLVao.hpp"
 #include "GLVbo.hpp"
 #include "OBJLoader.hpp"
@@ -15,26 +16,52 @@
 #include "glm/fwd.hpp"
 #include "p6/p6.h"
 
+struct ShadowProgram {
+    p6::Shader m_Program;
+    GLint      uMVPLight;
+    GLint      uMMatrix;
+    GLint      uLightPos;
+    GLint      ufar_plane;
+
+    ShadowProgram()
+        : m_Program(p6::load_shader("shaders/shadow.vs.glsl", "shaders/shadow.fs.glsl"))
+    {
+        this->uMVPLight  = glGetUniformLocation(m_Program.id(), "uMVPLight");
+        this->uMMatrix   = glGetUniformLocation(m_Program.id(), "uMMatrix");
+        this->uLightPos  = glGetUniformLocation(m_Program.id(), "uLightPos");
+        this->ufar_plane = glGetUniformLocation(m_Program.id(), "ufar_plane");
+    }
+};
+
+struct CameraDirection {
+    GLenum CubemapFace;
+    float  theta;
+    float  phi;
+};
+
 class Renderer {
 private:
-    GLVbo        m_vboBoids;
-    GLVbo        m_vboEnvironment;
-    GLVao        m_vaoBoids;
-    GLVao        m_vaoEnvironment;
-    p6::Shader   m_shader             = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
-    p6::Shader   m_shadowShader       = p6::load_shader("shaders/shadow.vs.glsl", "shaders/shadow.fs.glsl");
-    float        m_valueOrtho         = 85.f;
-    glm::mat4    m_shadowOrthoProjMat = glm::ortho(-m_valueOrtho, m_valueOrtho, -m_valueOrtho, m_valueOrtho, 0.1f, 75.0f);
-    glm::mat4    m_lightView          = glm::lookAt(5.0f * glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    glm::mat4    m_lightProjection    = m_shadowOrthoProjMat * m_lightView;
-    ShadowMapFBO m_shadowMap;
-    GLint        uMVPLight;
+    GLVbo                        m_vboBoids;
+    GLVbo                        m_vboEnvironment;
+    GLVao                        m_vaoBoids;
+    GLVao                        m_vaoEnvironment;
+    p6::Shader                   m_shader     = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
+    float                        m_aspect     = this->m_scene.shadow_width / this->m_scene.shadow_width;
+    float                        m_near       = 1.0f;
+    float                        m_far        = 25.0f;
+    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.0f), m_aspect, m_near, m_far);
+    std::vector<glm::mat4>       m_shadowTransforms;
+    ShadowProgram                m_shadowProgram;
+    ShadowCubeMapFBO             m_shadowCubeMap;
+    std::vector<CameraDirection> m_cameraDirections;
+    FreeflyCamera                m_viewMatrixLight = FreeflyCamera();
 
     void renderLights(p6::Context& ctx);
     void renderCamera(p6::Context& ctx);
     void renderBoids(p6::Context& ctx);
     void renderBoidsShadows(p6::Context& ctx);
     void renderEnvironment(p6::Context& ctx);
+    void renderEnvironmentShadows(p6::Context& ctx);
 
 public:
     std::vector<Boid> m_boidsContainer;

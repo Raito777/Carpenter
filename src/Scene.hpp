@@ -40,6 +40,9 @@ struct lightTexture {
     GLint uKd;
     GLint uKs;
     GLint uShininess;
+    GLint uTexture;
+    GLint ufar_plane;
+    GLint uLightPos;
 
     std::vector<glm::vec3> _uKd;
     std::vector<glm::vec3> _uKs;
@@ -50,6 +53,9 @@ struct lightTexture {
         this->uKd        = glGetUniformLocation(shaderId, "uKd");
         this->uKs        = glGetUniformLocation(shaderId, "uKs");
         this->uShininess = glGetUniformLocation(shaderId, "uShininess");
+        this->uTexture   = glGetUniformLocation(shaderId, "uTexture");
+        this->ufar_plane = glGetUniformLocation(shaderId, "ufar_plane");
+        this->uLightPos  = glGetUniformLocation(shaderId, "uLightPos");
     }
 };
 
@@ -101,11 +107,11 @@ public:
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
         m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
-        m_pointLight._uLightIntensity = glm::vec3(5.f, 5.f, 5.f);
+        m_pointLight._uLightIntensity = glm::vec3(100.f, 100.f, 100.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
-        m_dirLight._uLightIntensity = glm::vec3(0.2f, 0.2f, 0.2f);
+        m_dirLight._uLightIntensity = glm::vec3(0.9f, 0.9f, 0.9f);
 
         m_pointLight.initPointLightGlints(shaderId);
         m_dirLight.initDirLightGlints(shaderId);

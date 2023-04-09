@@ -26,29 +26,30 @@ public:
 
     void checkBorder(p6::Context& ctx, Environment environment)
     {
-        if (this->m_position.x > environment.m_sizeX)
+        // c'est pas mal avec ces valeurs
+        if (this->m_position.x > environment.m_sizeX - 1.5)
         {
-            this->m_direction.x = -this->m_direction.x;
+            this->m_direction.x += -0.02f;
         }
-        if (this->m_position.y > environment.m_sizeY)
+        if (this->m_position.y > environment.m_sizeY - 1.5)
         {
-            this->m_direction.y = -this->m_direction.y;
+            this->m_direction.y += -0.02f;
         }
-        if (this->m_position.x < -environment.m_sizeX)
+        if (this->m_position.x < -environment.m_sizeX + 1.5)
         {
-            this->m_direction.x = -this->m_direction.x;
+            this->m_direction.x += 0.02f;
         }
-        if (this->m_position.y < -environment.m_sizeY)
+        if (this->m_position.y < -environment.m_sizeY + 1.5)
         {
-            this->m_direction.y = -this->m_direction.y;
+            this->m_direction.y += 0.02f;
         }
-        if (this->m_position.z < -environment.m_sizeZ)
+        if (this->m_position.z < -environment.m_sizeZ + 1.5)
         {
-            this->m_direction.z = -this->m_direction.z;
+            this->m_direction.z += 0.02f;
         }
-        if (this->m_position.z > environment.m_sizeZ)
+        if (this->m_position.z > environment.m_sizeZ - 1.5)
         {
-            this->m_direction.z = -this->m_direction.z;
+            this->m_direction.z += -0.02f;
         }
     }
 };

@@ -54,63 +54,73 @@ Renderer::Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer, Environme
     this->m_vboEnvironment.unBind();
     this->m_vaoEnvironment.unBind();
 
-    if (this->m_shadowMap.Init(this->m_scene.shadow_width, this->m_scene.shadow_height))
-        std::cout << "Nice initiation of shadow map"
-                  << "\n";
-    this->m_shadowShader.use();
-    this->uMVPLight = glGetUniformLocation(m_shadowShader.id(), "uMVPLight");
-    this->m_scene.updateGlints(ctx, m_shadowShader.id());
-    glUniformMatrix4fv(this->uMVPLight, 1, GL_FALSE, glm::value_ptr(this->m_lightProjection * this->m_scene.m_camera.getViewMatrix()));
+    this->m_cameraDirections = {
+        {GL_TEXTURE_CUBE_MAP_POSITIVE_X, 180.f, -90.f},
+        {GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 180.f, 90.f},
+        {GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 90.f, 180.f},
+        {GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, -90.f, 0.f},
+        {GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 180.f, 180.f},
+        {GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 180.f, 0.f}};
+
+    this->m_shadowProgram = ShadowProgram();
+    m_shadowCubeMap.Init(this->m_scene.shadow_width);
+
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    float factor = 1.f;
+    float units  = 1.f;
+    glPolygonOffset(factor, units);
 }
 
 void Renderer::render(p6::Context& ctx)
 {
-    this->m_shadowShader.use();
-    this->m_scene.updateGlints(ctx, m_shadowShader.id());
+    // ctx.render_to_main_canvas();
+    this->m_shadowProgram.m_Program.use();
+    for (size_t i = 0; i < 6; i++)
+    {
+        m_shadowCubeMap.BindForWriting(m_cameraDirections[i].CubemapFace);
 
-    glEnable(GL_DEPTH_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-    this->m_shadowMap.BindForWriting();
-    this->uMVPLight = glGetUniformLocation(m_shadowShader.id(), "uMVPLight");
+        m_viewMatrixLight.setPos(this->m_scene.m_pointLight._lightPos);
+        m_viewMatrixLight.setTheta(m_cameraDirections[i].theta);
+        m_viewMatrixLight.setPhi(m_cameraDirections[i].phi);
 
-    glUniformMatrix4fv(this->uMVPLight, 1, GL_FALSE, glm::value_ptr(this->m_lightProjection * this->m_scene.m_camera.getViewMatrix()));
+        this->m_scene.updateGlints(ctx, this->m_shadowProgram.m_Program.id());
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+        // this->renderCamera(ctx);
+        // this->renderLights(ctx);
 
-    this->renderCamera(ctx);
-    this->renderLights(ctx);
+        this->m_vaoEnvironment.bind();
+        this->renderEnvironmentShadows(ctx);
+        this->m_vaoEnvironment.unBind();
 
-    this->m_vaoEnvironment.bind();
-    this->renderEnvironment(ctx);
-    this->m_vaoEnvironment.unBind();
-
-    this->m_vaoBoids.bind();
-    this->renderBoids(ctx);
-    this->m_vaoBoids.unBind();
-
-    glClear(GL_DEPTH_BUFFER_BIT);
+        this->m_vaoBoids.bind();
+        this->renderBoidsShadows(ctx);
+        this->m_vaoBoids.unBind();
+    }
 
     ctx.render_to_main_canvas();
+
+    m_viewMatrixLight.setTheta(m_cameraDirections[(int)ctx.time() % 6].theta);
+    m_viewMatrixLight.setPhi(m_cameraDirections[(int)ctx.time() % 6].phi);
+
     glViewport(0, 0, ctx.current_canvas_width(), ctx.current_canvas_height());
 
-    this->m_shader.use();
-    this->uMVPLight = glGetUniformLocation(m_shader.id(), "uMVPLight");
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    this->m_scene.updateGlints(ctx, m_shader.id());
+    this->m_shader.use();
+    this->m_scene.updateGlints(ctx, this->m_shader.id());
 
     this->renderCamera(ctx);
     this->renderLights(ctx);
 
     this->m_vaoEnvironment.bind();
-
     this->renderEnvironment(ctx);
-
     this->m_vaoEnvironment.unBind();
 
     this->m_vaoBoids.bind();
-
     this->renderBoids(ctx);
-
     this->m_vaoBoids.unBind();
 }
 
@@ -143,7 +153,9 @@ void Renderer::renderBoids(p6::Context& ctx)
 
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
-        this->m_shadowMap.BindForReading(GL_TEXTURE0);
+        m_shadowCubeMap.BindForReading(GL_TEXTURE1);
+
+        glm::mat4 MMatrix = glm::rotate(glm::mat4(1.f), 0.f, glm::vec3(0, 1, 0));
 
         this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_environment);
@@ -157,20 +169,46 @@ void Renderer::renderBoids(p6::Context& ctx)
         this->m_scene.m_boidsTransformations.MVMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MVMatrix, angle, axis);
         this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
 
+        glUniform1f(this->m_scene.m_boidLightTexture.ufar_plane, m_far);
+        glUniform3fv(this->m_scene.m_boidLightTexture.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
+
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.ProjMatrix * this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.NormalMatrix));
 
         glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_boidModel.size());
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+}
+
+void Renderer::renderBoidsShadows(p6::Context& ctx)
+{
+    for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
+    {
+        // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
+        glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
+        glm::vec3 up        = glm::vec3(0.0f, 0.0f, 1.0f); // boids orientés vers le haut par défaut
+        glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
+        float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
+
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MVMatrix, angle, axis);
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
+
+        glUniform1f(m_shadowProgram.ufar_plane, m_far);
+        glUniform3fv(m_shadowProgram.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
+        glUniformMatrix4fv(m_shadowProgram.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.MVMatrix));
+        glUniformMatrix4fv(m_shadowProgram.uMVPLight, 1, GL_FALSE, glm::value_ptr(m_shadowProj * m_viewMatrixLight.getViewMatrix() * this->m_scene.m_boidsTransformations.MVMatrix));
+
+        glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_boidModel.size());
     }
 }
 
 void Renderer::renderEnvironment(p6::Context& ctx)
 {
-    this->m_shadowMap.BindForReading(GL_TEXTURE1);
+    m_shadowCubeMap.BindForReading(GL_TEXTURE1);
 
     this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_environment.m_position);
     this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
@@ -184,10 +222,27 @@ void Renderer::renderEnvironment(p6::Context& ctx)
     glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
     glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.NormalMatrix));
 
+    glUniform1f(this->m_scene.m_environmentLightTexture.ufar_plane, m_far);
+    glUniform3fv(this->m_scene.m_environmentLightTexture.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
+
     glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_environmentModel.size());
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void Renderer::renderEnvironmentShadows(p6::Context& ctx)
+{
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_environment.m_position);
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_environment.m_sizeX, this->m_environment.m_sizeY, this->m_environment.m_sizeZ));
+
+    glUniform1f(m_shadowProgram.ufar_plane, m_far);
+    glUniform3fv(m_shadowProgram.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
+    glUniformMatrix4fv(m_shadowProgram.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(m_shadowProgram.uMVPLight, 1, GL_FALSE, glm::value_ptr(m_shadowProj * m_viewMatrixLight.getViewMatrix() * this->m_scene.m_environmentTransformations.MVMatrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_environmentModel.size());
 }
 
 void Renderer::deleteBuffers()
@@ -197,6 +252,4 @@ void Renderer::deleteBuffers()
 
     this->m_vaoBoids.deleteVao();
     this->m_vaoEnvironment.deleteVao();
-
-    this->m_shadowMap.deleteBuffers();
 }

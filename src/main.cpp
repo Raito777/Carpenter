@@ -42,9 +42,6 @@ int main()
     // Declare your infinite update loop.
 
     ctx.update = [&]() {
-        glClearColor(0.5f, 0.5f, 0.5f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glfwSetInputMode(ctx.underlying_glfw_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         glContext.draw(ctx);

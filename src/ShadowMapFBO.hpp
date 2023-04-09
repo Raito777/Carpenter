@@ -13,23 +13,17 @@
 #include "glm/fwd.hpp"
 #include "p6/p6.h"
 
-class ShadowMapFBO {
+class ShadowCubeMapFBO {
 public:
-    ShadowMapFBO();
-
-    ~ShadowMapFBO();
-
-    void deleteBuffers();
-
-    bool Init(unsigned int WindowWidth, unsigned int WindowHeight);
-
-    void BindForWriting();
-
+    ShadowCubeMapFBO();
+    ~ShadowCubeMapFBO();
+    bool Init(unsigned int size);
+    void BindForWriting(GLenum CubeFace);
     void BindForReading(GLenum TextureUnit);
 
 private:
-    unsigned int m_width     = 0;
-    unsigned int m_height    = 0;
-    GLuint       m_fbo       = 0;
-    GLuint       m_shadowMap = 0;
+    unsigned int m_size          = 0;
+    GLuint       m_fbo           = 0;
+    GLuint       m_shadowCubeMap = 0;
+    // GLuint       m_depth         = 0;
 };
