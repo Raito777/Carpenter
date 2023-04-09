@@ -13,8 +13,6 @@ struct sceneLightSetup {
     GLint uLightPos_vs;
     GLint uLightDir_vs;
 
-    GLint uMVPLight;
-
     GLint uLightIntensity;
     GLint uAmbient;
 
@@ -29,14 +27,12 @@ struct sceneLightSetup {
         this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs_Light1");
         this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light1");
         this->uAmbient        = glGetUniformLocation(shaderId, "uKa_Light1");
-        this->uMVPLight       = glGetUniformLocation(shaderId, "uMVPLight");
     }
 
     void initDirLightGlints(const unsigned int shaderId)
     {
         this->uLightDir_vs    = glGetUniformLocation(shaderId, "uLightDir_vs_Light2");
         this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light2");
-        this->uMVPLight       = glGetUniformLocation(shaderId, "uMVPLight");
     }
 };
 
@@ -128,4 +124,16 @@ public:
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));
         this->m_environmentLightTexture._uShininess.push_back(1.f);
     };
+
+    void updateGlints(p6::Context& ctx, const unsigned int shaderId)
+    {
+        m_pointLight.initPointLightGlints(shaderId);
+        m_dirLight.initDirLightGlints(shaderId);
+
+        m_boidsTransformations.initModelTransformations(ctx, shaderId);
+        m_environmentTransformations.initModelTransformations(ctx, shaderId);
+
+        m_boidLightTexture.initLightTexture(shaderId);
+        m_environmentLightTexture.initLightTexture(shaderId);
+    }
 };

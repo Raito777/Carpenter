@@ -16,8 +16,6 @@
 int const windowWidth  = 1280;
 int const windowHeight = 720;
 
-
-
 int main()
 {
     auto ctx = p6::Context{{windowWidth, windowHeight, "Carpenter"}};
@@ -30,10 +28,10 @@ int main()
 
     std::vector<Boid> boids;
 
-    for (size_t i = 0; i < 1000; i++)
+    for (size_t i = 0; i < 100; i++)
     {
         glm::vec3 position{p6::random::number(-environment.m_sizeX, environment.m_sizeX), p6::random::number(-environment.m_sizeY, environment.m_sizeY), p6::random::number(-environment.m_sizeZ, environment.m_sizeZ)};
-        float     size = 0.001f;
+        float     size = 0.003f;
         // float size = 0.1f;
         Boid boid(position, size);
         boids.push_back(boid);

@@ -19,6 +19,8 @@ public:
 
     ~ShadowMapFBO();
 
+    void deleteBuffers();
+
     bool Init(unsigned int WindowWidth, unsigned int WindowHeight);
 
     void BindForWriting();

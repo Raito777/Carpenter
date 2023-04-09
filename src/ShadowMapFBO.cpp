@@ -5,8 +5,14 @@ ShadowMapFBO::ShadowMapFBO() = default;
 
 ShadowMapFBO::~ShadowMapFBO()
 {
-    glDeleteFramebuffers(1, &m_fbo);
-    glDeleteTextures(1, &m_shadowMap);
+    // glDeleteFramebuffers(1, &m_fbo);
+    // glDeleteTextures(1, &m_shadowMap);
+}
+
+void ShadowMapFBO::deleteBuffers()
+{
+    // glDeleteFramebuffers(1, &m_fbo);
+    // glDeleteTextures(1, &m_shadowMap);
 }
 
 bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
@@ -15,9 +21,7 @@ bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
     m_height = WindowHeight;
 
     // Create the FBO
-
-    glGenFramebuffers(1, &m_fbo);
-
+    glGenFramebuffers(1, &this->m_fbo);
     std::cout << "FBO : " << this->m_fbo << "\n";
 
     // create the depth buffer
@@ -31,7 +35,7 @@ bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
     float borderColor[] = {1.f, 1.f, 1.f, 1.f};
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->m_fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMap, 0);
 
     // Disable writes to the color buffer
@@ -53,7 +57,7 @@ bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 
 void ShadowMapFBO::BindForWriting()
 {
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->m_fbo);
     glpp::viewport(0, 0, m_width, m_height); // Width/height of shadow map
 }
 
