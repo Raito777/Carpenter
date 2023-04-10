@@ -117,6 +117,10 @@ void Renderer::render(p6::Context& ctx)
         this->m_vaoBoids.bind();
         this->renderBoidsShadows(ctx);
         this->m_vaoBoids.unBind();
+
+        this->m_vaoCharacter.bind();
+        this->renderCharacterShadows(ctx);
+        this->m_vaoCharacter.unBind();
     }
 
     ctx.render_to_main_canvas();
@@ -185,6 +189,8 @@ void Renderer::renderBoids(p6::Context& ctx)
 
         this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
+        this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
+
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
         glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
         glm::vec3 up        = glm::vec3(0.0f, 0.0f, 1.0f); // boids orientés vers le haut par défaut
@@ -222,6 +228,8 @@ void Renderer::renderBoidsShadows(p6::Context& ctx)
         float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
 
         this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_boidsTransformations.MVMatrix, -this->m_scene.m_character.m_position);
+
         this->m_scene.m_boidsTransformations.MVMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MVMatrix, angle, axis);
         this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
 
@@ -241,7 +249,7 @@ void Renderer::renderEnvironment(p6::Context& ctx)
     this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_environment.m_position);
     this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_environmentTransformations.MVMatrix, -this->m_scene.m_character.m_position);
 
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    // this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
     this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_scene.m_environment.m_sizeX, this->m_scene.m_environment.m_sizeY, this->m_scene.m_environment.m_sizeZ));
 
     glUniform3fv(this->m_scene.m_environmentLightTexture.uKd, 1, glm::value_ptr(this->m_scene.m_environmentLightTexture._uKd[0]));
@@ -261,6 +269,22 @@ void Renderer::renderEnvironment(p6::Context& ctx)
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+void Renderer::renderEnvironmentShadows(p6::Context& ctx)
+{
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_environment.m_position);
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_environmentTransformations.MVMatrix, -this->m_scene.m_character.m_position);
+
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_scene.m_environment.m_sizeX, this->m_scene.m_environment.m_sizeY, this->m_scene.m_environment.m_sizeZ));
+
+    glUniform1f(m_shadowProgram.ufar_plane, m_far);
+    glUniform3fv(m_shadowProgram.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
+    glUniformMatrix4fv(m_shadowProgram.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(m_shadowProgram.uMVPLight, 1, GL_FALSE, glm::value_ptr(m_shadowProj * m_viewMatrixLight.getViewMatrix() * this->m_scene.m_environmentTransformations.MVMatrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_environmentModel.size());
+}
+
 void Renderer::renderCharacter(p6::Context& ctx)
 {
     m_shadowCubeMap.BindForReading(GL_TEXTURE1);
@@ -271,7 +295,6 @@ void Renderer::renderCharacter(p6::Context& ctx)
 
     this->m_scene.m_characterTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), glm::vec3(0, -1, 0));
     this->m_scene.m_characterTransformations.MVMatrix = glm::rotate(this->m_scene.m_characterTransformations.MVMatrix, angleY, glm::vec3(0.f, 1.f, 0.f));
-
     this->m_scene.m_characterTransformations.MVMatrix = glm::scale(this->m_scene.m_characterTransformations.MVMatrix, glm::vec3(this->m_scene.m_character.m_sizeX, this->m_scene.m_character.m_sizeY, this->m_scene.m_character.m_sizeZ));
 
     glUniform3fv(this->m_scene.m_characterLightTexture.uKd, 1, glm::value_ptr(this->m_scene.m_characterLightTexture._uKd[0]));
@@ -291,25 +314,31 @@ void Renderer::renderCharacter(p6::Context& ctx)
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void Renderer::renderEnvironmentShadows(p6::Context& ctx)
+void Renderer::renderCharacterShadows(p6::Context& ctx)
 {
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_environment.m_position);
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_scene.m_environment.m_sizeX, this->m_scene.m_environment.m_sizeY, this->m_scene.m_environment.m_sizeZ));
+    float angleY = glm::radians(-this->m_scene.m_camera.getAngleY());
+
+    this->m_scene.m_character.m_angleY = angleY;
+
+    this->m_scene.m_characterTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), glm::vec3(0, -1, 0));
+    this->m_scene.m_characterTransformations.MVMatrix = glm::rotate(this->m_scene.m_characterTransformations.MVMatrix, angleY, glm::vec3(0.f, 1.f, 0.f));
+    this->m_scene.m_characterTransformations.MVMatrix = glm::scale(this->m_scene.m_characterTransformations.MVMatrix, glm::vec3(this->m_scene.m_character.m_sizeX, this->m_scene.m_character.m_sizeY, this->m_scene.m_character.m_sizeZ));
 
     glUniform1f(m_shadowProgram.ufar_plane, m_far);
     glUniform3fv(m_shadowProgram.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));
-    glUniformMatrix4fv(m_shadowProgram.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
-    glUniformMatrix4fv(m_shadowProgram.uMVPLight, 1, GL_FALSE, glm::value_ptr(m_shadowProj * m_viewMatrixLight.getViewMatrix() * this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(m_shadowProgram.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_characterTransformations.MVMatrix));
+    glUniformMatrix4fv(m_shadowProgram.uMVPLight, 1, GL_FALSE, glm::value_ptr(m_shadowProj * m_viewMatrixLight.getViewMatrix() * this->m_scene.m_characterTransformations.MVMatrix));
 
-    glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_environmentModel.size());
+    glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_characterModel.size());
 }
 
 void Renderer::deleteBuffers()
 {
     this->m_vboBoids.deleteVbo();
     this->m_vboEnvironment.deleteVbo();
+    this->m_vboCharacter.deleteVbo();
 
     this->m_vaoBoids.deleteVao();
     this->m_vaoEnvironment.deleteVao();
+    this->m_vaoCharacter.deleteVao();
 }

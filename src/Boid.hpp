@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <random>
 #include <vector>
+#include "Character.hpp"
 #include "Environment.hpp"
 #include "glm/fwd.hpp"
 #include "glm/geometric.hpp"
@@ -31,27 +32,38 @@ public:
         // c'est pas mal avec ces valeurs
         if (this->m_position.x > environment.m_sizeX - 2)
         {
-            this->m_direction.x += -0.02f;
+            this->m_direction.x += -0.08f;
         }
         if (this->m_position.y > environment.m_sizeY - 2)
         {
-            this->m_direction.y += -0.02f;
+            this->m_direction.y += -0.08f;
         }
         if (this->m_position.x < -environment.m_sizeX + 2)
         {
-            this->m_direction.x += 0.02f;
+            this->m_direction.x += 0.08f;
         }
         if (this->m_position.y < -environment.m_sizeY + 2)
         {
-            this->m_direction.y += 0.02f;
+            this->m_direction.y += 0.08f;
         }
         if (this->m_position.z < -environment.m_sizeZ + 2)
         {
-            this->m_direction.z += 0.02f;
+            this->m_direction.z += 0.08f;
         }
         if (this->m_position.z > environment.m_sizeZ - 2)
         {
-            this->m_direction.z += -0.02f;
+            this->m_direction.z += -0.08f;
         }
+    }
+
+    void avoidCharacter(p6::Context& ctx, Character character)
+    {
+        glm::vec3 totalForce(0.0f, 0.0f, 0.0f);
+
+        float distance = glm::distance(this->m_position, character.m_position);
+        totalForce     = (this->m_position - character.m_position) / (distance * 50.f);
+
+        // Calculer la direction à partir du vecteur diff
+        this->m_direction += totalForce;
     }
 };

@@ -66,6 +66,7 @@ private:
     void renderEnvironment(p6::Context& ctx);
     void renderEnvironmentShadows(p6::Context& ctx);
     void renderCharacter(p6::Context& ctx);
+    void renderCharacterShadows(p6::Context& ctx);
 
 public:
     std::vector<Boid> m_boidsContainer;

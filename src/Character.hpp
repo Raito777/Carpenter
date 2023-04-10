@@ -12,9 +12,11 @@
 class Character {
 private:
 public:
-    float m_sizeX = 0.5f;
-    float m_sizeY = 0.5f;
-    float m_sizeZ = 0.5f;
+    float m_sizeX = 0.2f;
+    float m_sizeY = 0.2f;
+    float m_sizeZ = 0.2f;
+
+    float safetyDistance = 1.f;
 
     float m_speed = 10.f;
 

@@ -115,9 +115,9 @@ public:
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
-        this->m_characterModel = loadOBJ("./assets/models/modular-cube.obj");
+        this->m_characterModel = loadOBJ("./assets/models/clock_obj.obj");
 
-        m_environment = Environment(20, 10, 10);
+        m_environment = Environment(10, 3, 10);
 
         m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
         m_pointLight._uLightIntensity = glm::vec3(100.f, 100.f, 100.f);
