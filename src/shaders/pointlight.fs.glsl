@@ -24,10 +24,11 @@ uniform vec3 uLightDir_vs_Light2;
 uniform vec3 uLightIntensity_Light2; //Li
 
 
+uniform sampler2D uTextureImg;
+
 
 uniform float ufar_plane;
 
-//uniform sampler2D uTexture1;
 uniform samplerCube uTexture;
 
 
@@ -57,8 +58,6 @@ float calcShadowFactorPointLight() {
     
     float Distance = length(LightToVertex)/ufar_plane;
 
-    //LightToVertex.y = -LightToVertex.y;
-
     float SampledDistance = texture(uTexture, LightToVertex).r;
 
     float bias = 0.025;
@@ -72,5 +71,7 @@ float calcShadowFactorPointLight() {
 }
 
 void main() {
-    fFragColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()+dirblinnPhong()), 1);
+    vec4 texColor = texture(uTextureImg, vTexCoords);
+    vec4 lightColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()+dirblinnPhong()), 1);
+    fFragColor = mix(texColor, lightColor, 0.5); // 0.5 est le coefficient d'interpolation, ajustez-le en fonction de vos besoins
 }

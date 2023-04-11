@@ -61,6 +61,46 @@ struct lightTexture {
     }
 };
 
+struct objectTexture {
+    img::Image imgTexture = p6::load_image_buffer("./assets/textures/defaultTexture.png");
+    GLuint     texture;
+    GLint      uTexture;
+
+    objectTexture(std::filesystem::path file_path)
+    {
+        this->imgTexture = p6::load_image_buffer(file_path);
+        std::cout << file_path << "\n";
+        genTexture();
+    }
+
+    void genTexture()
+    {
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgTexture.width(), imgTexture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgTexture.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    void bindTexture(GLenum textureUnit)
+    {
+        glActiveTexture(textureUnit);
+        glBindTexture(GL_TEXTURE_2D, this->texture);
+        glUniform1i(uTexture, 0);
+    }
+
+    void unbindTexture()
+    {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    void updateGlint(int shaderId)
+    {
+        uTexture = glGetUniformLocation(shaderId, "uTextureImg");
+    }
+};
+
 struct modelTransformations {
     glm::mat4 ProjMatrix;
     glm::mat4 MVMatrix;
@@ -90,10 +130,12 @@ public:
     std::vector<glimac::ShapeVertex> m_boidModel;
     modelTransformations             m_boidsTransformations;
     lightTexture                     m_boidLightTexture;
+    objectTexture                    m_boidTextures = objectTexture("./assets/textures/batZombie.png");
 
     std::vector<glimac::ShapeVertex> m_environmentModel;
     modelTransformations             m_environmentTransformations;
     lightTexture                     m_environmentLightTexture;
+    objectTexture                    m_environmentTextures = objectTexture("./assets/textures/defaultTexture.png");
 
     std::vector<glimac::ShapeVertex> m_characterModel;
     modelTransformations             m_characterTransformations;
@@ -112,19 +154,23 @@ public:
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
         this->m_boidModel = loadOBJ("./assets/models/bat2.obj");
+
+        m_boidTextures.updateGlint(shaderId);
+        m_environmentTextures.updateGlint(shaderId);
+
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
-        this->m_characterModel = loadOBJ("./assets/models/clock_obj.obj");
+        this->m_characterModel = loadOBJ("./assets/models/modular-cube.obj");
 
         m_environment = Environment(10, 3, 10);
 
         m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
-        m_pointLight._uLightIntensity = glm::vec3(100.f, 100.f, 100.f);
+        m_pointLight._uLightIntensity = glm::vec3(200.f, 200.f, 200.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
-        m_dirLight._uLightIntensity = glm::vec3(1.9f, 1.9f, 1.9f);
+        m_dirLight._uLightIntensity = glm::vec3(0.f, 0.f, 0.f);
 
         m_pointLight.initPointLightGlints(shaderId);
         m_dirLight.initDirLightGlints(shaderId);
@@ -162,5 +208,8 @@ public:
         m_boidLightTexture.initLightTexture(shaderId);
         m_environmentLightTexture.initLightTexture(shaderId);
         m_characterLightTexture.initLightTexture(shaderId);
+
+        m_boidTextures.updateGlint(shaderId);
+        m_environmentTextures.updateGlint(shaderId);
     }
 };
