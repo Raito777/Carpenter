@@ -25,5 +25,4 @@ private:
     unsigned int m_size          = 0;
     GLuint       m_fbo           = 0;
     GLuint       m_shadowCubeMap = 0;
-    // GLuint       m_depth         = 0;
 };

@@ -9,6 +9,7 @@
 #include "GLVao.hpp"
 #include "GLVbo.hpp"
 #include "Renderer.hpp"
+#include "ShadowMapFBO.hpp"
 #include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
 #include "glm/ext.hpp"
@@ -26,8 +27,10 @@ private:
 
 public:
     GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);
-    void draw(p6::Context& ctx);
-    void deleteBuffers();
+
+    ShadowCubeMapFBO m_shadowMap;
+    void             draw(p6::Context& ctx);
+    void             deleteBuffers();
 
     // const p6::Shader GLContext::loadShaders();
 };

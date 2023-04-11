@@ -20,6 +20,9 @@ GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer)
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 
+    m_shadowMap.Init(2048);
+    std::cout << "1 : " << &m_shadowMap << "\n";
+
     this->m_renderer = Renderer(ctx, boidsContainer);
 
     ctx.mouse_scrolled = [&](p6::MouseScroll data) {
@@ -83,7 +86,7 @@ void GLContext::draw(p6::Context& ctx)
     {
         this->m_renderer.m_scene.m_character.moveRight(ctx);
     }
-    this->m_renderer.render(ctx);
+    this->m_renderer.render(ctx, this->m_shadowMap);
 }
 
 void GLContext::deleteBuffers()

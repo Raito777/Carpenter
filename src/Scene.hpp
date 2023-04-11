@@ -5,6 +5,7 @@
 #include "Character.hpp"
 #include "Environment.hpp"
 #include "OBJLoader.hpp"
+#include "ShadowMapFBO.hpp"
 #include "TrackballCamera.hpp"
 #include "glimac/common.hpp"
 #include "glimac/cone_vertices.hpp"
@@ -20,6 +21,9 @@ struct sceneLightSetup {
 
     glm::vec3 _uLightIntensity;
     glm::vec3 _lightPos;
+
+    glm::vec3 initialLightPos;
+
     glm::vec3 _lightDir;
 
     glm::vec3 _uAmbient;
@@ -78,8 +82,9 @@ struct objectTexture {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgTexture.width(), imgTexture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgTexture.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -87,7 +92,6 @@ struct objectTexture {
     {
         glActiveTexture(textureUnit);
         glBindTexture(GL_TEXTURE_2D, this->texture);
-        glUniform1i(uTexture, 0);
     }
 
     void unbindTexture()
@@ -124,13 +128,13 @@ struct modelTransformations {
 class Scene {
 private:
 public:
-    int shadow_width  = 4096;
-    int shadow_height = 4096;
+    int shadow_width  = 2048;
+    int shadow_height = 2048;
 
     std::vector<glimac::ShapeVertex> m_boidModel;
     modelTransformations             m_boidsTransformations;
     lightTexture                     m_boidLightTexture;
-    objectTexture                    m_boidTextures = objectTexture("./assets/textures/batZombie.png");
+    objectTexture                    m_boidTextures = objectTexture("./assets/textures/bat.png");
 
     std::vector<glimac::ShapeVertex> m_environmentModel;
     modelTransformations             m_environmentTransformations;
@@ -153,7 +157,7 @@ public:
 
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
-        this->m_boidModel = loadOBJ("./assets/models/bat2.obj");
+        this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
 
         m_boidTextures.updateGlint(shaderId);
         m_environmentTextures.updateGlint(shaderId);
@@ -165,8 +169,10 @@ public:
 
         m_environment = Environment(10, 3, 10);
 
-        m_pointLight._lightPos        = glm::vec3(0, 0, -0.5);
-        m_pointLight._uLightIntensity = glm::vec3(200.f, 200.f, 200.f);
+        m_pointLight._lightPos       = glm::vec3(0, 0, -0.5);
+        m_pointLight.initialLightPos = m_pointLight._lightPos;
+
+        m_pointLight._uLightIntensity = glm::vec3(20.f, 20.f, 20.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
@@ -183,13 +189,16 @@ public:
         m_environmentLightTexture.initLightTexture(shaderId);
         m_characterLightTexture.initLightTexture(shaderId);
 
-        this->m_boidLightTexture._uKd.push_back(glm::vec3(1.f, 0.1f, 0.1f));
-        this->m_boidLightTexture._uKs.push_back(glm::vec3(1.f, 0.1f, 0.1f));
+        // couleur reflétée
+        this->m_boidLightTexture._uKd.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
+        // couleur spéculaire reflétée dans une direction spécifique en fonction de l'angle de la
+        this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
+        // rugositée
         this->m_boidLightTexture._uShininess.push_back(1.f);
 
-        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 1.f));
-        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 1.f));
-        this->m_environmentLightTexture._uShininess.push_back(1.f);
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uShininess.push_back(0.2f);
 
         this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 1.f, 0.f));
         this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 1.f, 0.f));

@@ -51,21 +51,20 @@ private:
 
     p6::Shader                   m_shader     = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
     float                        m_near       = 0.1f;
-    float                        m_far        = 30.0f;
-    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.f), 4096 / static_cast<float>(4096), m_near, m_far);
+    float                        m_far        = 300.0f;
+    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.f), 2048 / static_cast<float>(2048), m_near, m_far);
     std::vector<glm::mat4>       m_shadowTransforms;
     ShadowProgram                m_shadowProgram;
-    ShadowCubeMapFBO             m_shadowCubeMap;
     std::vector<CameraDirection> m_cameraDirections;
     FreeflyCamera                m_viewMatrixLight = FreeflyCamera();
 
     void renderLights(p6::Context& ctx);
     void renderCamera(p6::Context& ctx);
-    void renderBoids(p6::Context& ctx);
+    void renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void renderBoidsShadows(p6::Context& ctx);
-    void renderEnvironment(p6::Context& ctx);
+    void renderEnvironment(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void renderEnvironmentShadows(p6::Context& ctx);
-    void renderCharacter(p6::Context& ctx);
+    void renderCharacter(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void renderCharacterShadows(p6::Context& ctx);
 
 public:
@@ -75,6 +74,6 @@ public:
     Renderer(){};
     Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer);
 
-    void render(p6::Context& ctx);
+    void render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void deleteBuffers();
 };
