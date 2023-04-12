@@ -52,7 +52,7 @@ private:
     p6::Shader                   m_shader     = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
     float                        m_near       = 0.1f;
     float                        m_far        = 30.0f;
-    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.f), 2048 / static_cast<float>(2048), m_near, m_far);
+    glm::mat4                    m_shadowProj = glm::perspective(glm::radians(90.f), 4096 / static_cast<float>(4096), m_near, m_far);
     std::vector<glm::mat4>       m_shadowTransforms;
     ShadowProgram                m_shadowProgram;
     std::vector<CameraDirection> m_cameraDirections;

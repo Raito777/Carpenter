@@ -109,6 +109,7 @@ struct modelTransformations {
     glm::mat4 ProjMatrix;
     glm::mat4 MVMatrix;
     glm::mat4 NormalMatrix;
+    glm::mat4 uMMatrix;
 
     GLint uMVPMatrix;
     GLint uMVMatrix;
@@ -172,7 +173,7 @@ public:
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight._uLightIntensity = glm::vec3(20.f, 20.f, 20.f);
+        m_pointLight._uLightIntensity = glm::vec3(2.f, 2.f, 2.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
