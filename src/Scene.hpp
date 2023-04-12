@@ -14,8 +14,9 @@
 
 struct sceneLightSetup {
     GLint uLightPos_vs;
-    GLint uLightDir_vs;
+    GLint uLightPos;
 
+    GLint uLightDir_vs;
     GLint uLightIntensity;
     GLint uAmbient;
 
@@ -33,6 +34,7 @@ struct sceneLightSetup {
         this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs_Light1");
         this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light1");
         this->uAmbient        = glGetUniformLocation(shaderId, "uKa_Light1");
+        this->uLightPos       = glGetUniformLocation(shaderId, "uLightPos_Light1");
     }
 
     void initDirLightGlints(const unsigned int shaderId)
@@ -109,20 +111,23 @@ struct modelTransformations {
     glm::mat4 ProjMatrix;
     glm::mat4 MVMatrix;
     glm::mat4 NormalMatrix;
-    glm::mat4 uMMatrix;
+    glm::mat4 MMatrix;
 
     GLint uMVPMatrix;
     GLint uMVMatrix;
     GLint uNormalMatrix;
+    GLint uMMatrix;
 
     void initModelTransformations(p6::Context& ctx, const unsigned int shaderId)
     {
         this->uMVPMatrix    = glGetUniformLocation(shaderId, "uMVPMatrix");
         this->uMVMatrix     = glGetUniformLocation(shaderId, "uMVMatrix");
         this->uNormalMatrix = glGetUniformLocation(shaderId, "uNormalMatrix");
-        this->ProjMatrix    = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
-        this->MVMatrix      = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2));
-        this->NormalMatrix  = glm::transpose(glm::inverse(this->MVMatrix));
+        this->uMMatrix      = glGetUniformLocation(shaderId, "uMMatrix");
+
+        this->ProjMatrix   = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
+        this->MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2));
+        this->NormalMatrix = glm::transpose(glm::inverse(this->MVMatrix));
     }
 };
 
@@ -166,14 +171,14 @@ public:
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
 
-        this->m_characterModel = loadOBJ("./assets/models/modular-cube.obj");
+        this->m_characterModel = loadOBJ("./assets/models/Robik.obj");
 
         m_environment = Environment(10, 5, 10);
 
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight._uLightIntensity = glm::vec3(2.f, 2.f, 2.f);
+        m_pointLight._uLightIntensity = glm::vec3(20.f, 20.f, 20.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);

@@ -16,6 +16,8 @@ uniform float uShininess;
 uniform vec3 uKa_Light1;
 
 uniform vec3 uLightPos_vs_Light1;
+uniform vec3 uLightPos_Light1;
+
 uniform vec3 uLightIntensity_Light1; //Li
 
 uniform vec3 uKa_Light2;
@@ -54,7 +56,7 @@ vec3 dirblinnPhong() {
 }
 
 float calcShadowFactorPointLight() {
-    vec3 LightToVertex = vWorldPos - uLightPos_vs_Light1;
+    vec3 LightToVertex = vWorldPos - uLightPos_Light1;
     
     float Distance = length(LightToVertex)/ufar_plane;
 
@@ -63,14 +65,14 @@ float calcShadowFactorPointLight() {
     float bias = 0.025;
 
     if ((SampledDistance + bias) < Distance) {
-        return 0.15;
+        return 0.05;
     }
     else {
         return 1.0;
     }
 }
 
-vec3 LightToVertex = vWorldPos - uLightPos_vs_Light1;
+vec3 LightToVertex = vWorldPos - uLightPos_Light1;
 
 float Distance = length(LightToVertex)/ufar_plane;
 
@@ -79,7 +81,7 @@ float SampledDistance = texture(uTexture, LightToVertex).r;
 void main() {
     vec4 texColor = texture(uTextureImg, vTexCoords);
     vec4 lightColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()+dirblinnPhong()), 1);
-    //fFragColor = mix(texColor, lightColor, 0.5); // 0.5 est le coefficient d'interpolation
-     fFragColor = vec4(vec3(texture(uTexture, LightToVertex).r),1);
+    fFragColor = mix(texColor, lightColor, 0.5); // 0.5 est le coefficient d'interpolation
+    //  fFragColor = vec4(vec3(texture(uTexture, LightToVertex).r),1);
 
 }
