@@ -157,6 +157,9 @@ void Renderer::renderLights(p6::Context& ctx)
 {
     glm::vec3 uMVLightsPos;
 
+    // playing a bit
+    this->m_scene.m_pointLight.initialLightPos.x = glm::sin(ctx.time()) * 5;
+
     this->m_scene.m_pointLight._lightPos = this->m_scene.m_pointLight.initialLightPos - this->m_scene.m_character.m_position;
 
     uMVLightsPos = glm::vec3(this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
@@ -190,7 +193,7 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
-        this->m_boidsContainer[i].moove(ctx);
+        // this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
         // this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
 

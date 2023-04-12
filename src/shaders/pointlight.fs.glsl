@@ -80,8 +80,8 @@ float SampledDistance = texture(uTexture, LightToVertex).r;
 
 void main() {
     vec4 texColor = texture(uTextureImg, vTexCoords);
-    vec4 lightColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()+dirblinnPhong()), 1);
-    fFragColor = mix(texColor, lightColor, 0.5); // 0.5 est le coefficient d'interpolation
+    vec4 lightColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()), 1);
+    fFragColor = mix(texColor, lightColor, 0.95); // 0.5 est le coefficient d'interpolation
     //  fFragColor = vec4(vec3(texture(uTexture, LightToVertex).r),1);
 
 }

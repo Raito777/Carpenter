@@ -178,7 +178,7 @@ public:
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight._uLightIntensity = glm::vec3(20.f, 20.f, 20.f);
+        m_pointLight._uLightIntensity = glm::vec3(20.f, 10.f, 10.f);
         m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
@@ -196,19 +196,19 @@ public:
         m_characterLightTexture.initLightTexture(shaderId);
 
         // couleur reflétée
-        this->m_boidLightTexture._uKd.push_back(glm::vec3(0.2f, 0.2f, 0.5f));
+        this->m_boidLightTexture._uKd.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
         // couleur spéculaire reflétée dans une direction spécifique en fonction de l'angle de la
-        this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.5f));
+        this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
         // rugositée
-        this->m_boidLightTexture._uShininess.push_back(1.f);
+        this->m_boidLightTexture._uShininess.push_back(0.1f);
 
-        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.5f, 0.1f, 0.1f));
-        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.5f, 0.1f, 0.1f));
-        this->m_environmentLightTexture._uShininess.push_back(0.2f);
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uShininess.push_back(0.1f);
 
-        this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 1.f, 0.f));
-        this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 1.f, 0.f));
-        this->m_characterLightTexture._uShininess.push_back(1.f);
+        this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_characterLightTexture._uShininess.push_back(0.1f);
     };
 
     void updateGlints(p6::Context& ctx, const unsigned int shaderId)
