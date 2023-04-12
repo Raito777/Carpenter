@@ -32,27 +32,27 @@ public:
         // c'est pas mal avec ces valeurs
         if (this->m_position.x > environment.m_sizeX - 2)
         {
-            this->m_direction.x += -0.08f;
+            this->m_direction.x += -0.4f;
         }
         if (this->m_position.y > environment.m_sizeY - 2)
         {
-            this->m_direction.y += -0.08f;
+            this->m_direction.y += -0.4f;
         }
         if (this->m_position.x < -environment.m_sizeX + 2)
         {
-            this->m_direction.x += 0.08f;
+            this->m_direction.x += 0.4f;
         }
         if (this->m_position.y < -environment.m_sizeY + 2)
         {
-            this->m_direction.y += 0.08f;
+            this->m_direction.y += 0.4f;
         }
         if (this->m_position.z < -environment.m_sizeZ + 2)
         {
-            this->m_direction.z += 0.08f;
+            this->m_direction.z += 0.4f;
         }
         if (this->m_position.z > environment.m_sizeZ - 2)
         {
-            this->m_direction.z += -0.08f;
+            this->m_direction.z += -0.4f;
         }
     }
 

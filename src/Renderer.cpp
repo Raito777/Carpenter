@@ -90,13 +90,15 @@ Renderer::Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer)
     float factor = 1.f;
     float units  = 1.f;
     glPolygonOffset(factor, units);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 {
     // ctx.render_to_main_canvas();
     this->m_shadowProgram.m_Program.use();
-    // std::cout << "2 : " << &shadowMap << "\n";
+    std::cout << "2 : " << &shadowMap << "\n";
 
     this->m_scene.updateGlints(ctx, this->m_shadowProgram.m_Program.id());
     for (size_t i = 0; i < 6; i++)
@@ -126,9 +128,6 @@ void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     }
 
     ctx.render_to_main_canvas();
-
-    // m_viewMatrixLight.setTheta(m_cameraDirections[(int)ctx.time() % 6].theta);
-    // m_viewMatrixLight.setPhi(m_cameraDirections[(int)ctx.time() % 6].phi);
 
     glViewport(0, 0, ctx.current_canvas_width(), ctx.current_canvas_height());
 
@@ -172,7 +171,7 @@ void Renderer::renderLights(p6::Context& ctx)
 
 void Renderer::renderCamera(p6::Context& ctx)
 {
-    float movementStrength = 5000.f * ctx.delta_time();
+    float movementStrength = 1000.f * ctx.delta_time();
     this->m_scene.m_camera.rotateLeft(ctx.mouse_delta().y * movementStrength);
     this->m_scene.m_camera.rotateUp(ctx.mouse_delta().x * movementStrength);
 }
@@ -182,11 +181,11 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     glUniform3fv(this->m_scene.m_boidLightTexture.uKd, 1, glm::value_ptr(this->m_scene.m_boidLightTexture._uKd[0]));
     glUniform3fv(this->m_scene.m_boidLightTexture.uKs, 1, glm::value_ptr(this->m_scene.m_boidLightTexture._uKs[0]));
     glUniform1f(this->m_scene.m_boidLightTexture.uShininess, this->m_scene.m_boidLightTexture._uShininess[0]);
+    std::cout << "3 : " << &shadowMap << "\n";
 
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
         shadowMap.BindForReading(GL_TEXTURE1);
-        // std::cout << "3 : " << &shadowMap << "\n";
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
@@ -194,7 +193,7 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
         this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
-        this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
+        // this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
 
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
         glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);

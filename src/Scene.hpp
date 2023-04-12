@@ -128,8 +128,8 @@ struct modelTransformations {
 class Scene {
 private:
 public:
-    int shadow_width  = 2048;
-    int shadow_height = 2048;
+    int shadow_width  = 4096;
+    int shadow_height = 4096;
 
     std::vector<glimac::ShapeVertex> m_boidModel;
     modelTransformations             m_boidsTransformations;
@@ -167,9 +167,9 @@ public:
 
         this->m_characterModel = loadOBJ("./assets/models/modular-cube.obj");
 
-        m_environment = Environment(10, 3, 10);
+        m_environment = Environment(10, 5, 10);
 
-        m_pointLight._lightPos       = glm::vec3(0, 0, -0.5);
+        m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
         m_pointLight._uLightIntensity = glm::vec3(20.f, 20.f, 20.f);
@@ -190,14 +190,14 @@ public:
         m_characterLightTexture.initLightTexture(shaderId);
 
         // couleur reflétée
-        this->m_boidLightTexture._uKd.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
+        this->m_boidLightTexture._uKd.push_back(glm::vec3(0.2f, 0.2f, 0.5f));
         // couleur spéculaire reflétée dans une direction spécifique en fonction de l'angle de la
-        this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
+        this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.5f));
         // rugositée
         this->m_boidLightTexture._uShininess.push_back(1.f);
 
-        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
-        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.5f, 0.1f, 0.1f));
+        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.5f, 0.1f, 0.1f));
         this->m_environmentLightTexture._uShininess.push_back(0.2f);
 
         this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 1.f, 0.f));
