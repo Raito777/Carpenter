@@ -15,18 +15,15 @@
 struct sceneLightSetup {
     GLint uLightPos_vs;
     GLint uLightPos;
-
     GLint uLightDir_vs;
     GLint uLightIntensity;
     GLint uAmbient;
 
     glm::vec3 _uLightIntensity;
+    glm::vec3 initialLightIntensity;
     glm::vec3 _lightPos;
-
     glm::vec3 initialLightPos;
-
     glm::vec3 _lightDir;
-
     glm::vec3 _uAmbient;
 
     void initPointLightGlints(const unsigned int shaderId)
@@ -163,10 +160,10 @@ public:
 
     Scene(p6::Context& ctx, const unsigned int shaderId)
     {
-        this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
-
         m_boidTextures.updateGlint(shaderId);
         m_environmentTextures.updateGlint(shaderId);
+
+        this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
 
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
         this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
@@ -178,8 +175,10 @@ public:
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight._uLightIntensity = glm::vec3(20.f, 10.f, 10.f);
-        m_pointLight._uAmbient        = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_pointLight._uLightIntensity      = glm::vec3(60.f, 30.f, 30.f);
+        m_pointLight.initialLightIntensity = m_pointLight._uLightIntensity;
+
+        m_pointLight._uAmbient = glm::vec3(0.0f, 0.0f, 0.0f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
         m_dirLight._uLightIntensity = glm::vec3(0.f, 0.f, 0.f);
@@ -226,5 +225,40 @@ public:
 
         m_boidTextures.updateGlint(shaderId);
         m_environmentTextures.updateGlint(shaderId);
+    }
+
+    void setLight1Intensity(float lightAdjustment)
+    {
+        this->m_pointLight._uLightIntensity = this->m_pointLight.initialLightIntensity * lightAdjustment;
+    }
+
+    void setBoidModel(int boidNumModel)
+    {
+        if (boidNumModel == 1)
+        {
+            this->m_boidModel = glimac::cone_vertices(1.f, 0.5f, 16, 32);
+        }
+
+        if (boidNumModel == 2)
+        {
+            this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
+        }
+        if (boidNumModel == 3)
+        {
+            this->m_boidModel = loadOBJ("./assets/models/bat2.obj");
+        }
+    }
+
+    void setEnvironmentModel(int environmentModel)
+    {
+        if (environmentModel == 1)
+        {
+            this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
+        }
+
+        if (environmentModel == 2)
+        {
+            this->m_environmentModel = loadOBJ("./assets/models/modular-cube.obj");
+        }
     }
 };

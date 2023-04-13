@@ -193,7 +193,7 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
-        // this->m_boidsContainer[i].moove(ctx);
+        this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
         // this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
 
@@ -365,4 +365,18 @@ void Renderer::deleteBuffers()
     this->m_vaoBoids.deleteVao();
     this->m_vaoEnvironment.deleteVao();
     this->m_vaoCharacter.deleteVao();
+}
+
+void Renderer::updateBoidVbo()
+{
+    this->m_vboBoids.bind();
+    glBufferData(GL_ARRAY_BUFFER, this->m_scene.m_boidModel.size() * sizeof(glimac::ShapeVertex), this->m_scene.m_boidModel.data(), GL_STATIC_DRAW);
+    this->m_vboBoids.unBind();
+}
+
+void Renderer::updateEnvironmentVbo()
+{
+    this->m_vboEnvironment.bind();
+    glBufferData(GL_ARRAY_BUFFER, this->m_scene.m_environmentModel.size() * sizeof(glimac::ShapeVertex), this->m_scene.m_environmentModel.data(), GL_STATIC_DRAW);
+    this->m_vboEnvironment.unBind();
 }

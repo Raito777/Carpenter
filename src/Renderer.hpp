@@ -75,5 +75,7 @@ public:
     Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer);
 
     void render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
+    void updateBoidVbo();
+    void updateEnvironmentVbo();
     void deleteBuffers();
 };

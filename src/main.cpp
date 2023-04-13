@@ -42,8 +42,6 @@ int main()
     // Declare your infinite update loop.
 
     ctx.update = [&]() {
-        glfwSetInputMode(ctx.underlying_glfw_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
         glContext.draw(ctx);
     };
 

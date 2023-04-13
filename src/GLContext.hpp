@@ -20,10 +20,16 @@
 class GLContext {
 private:
     Renderer m_renderer;
-    bool     Z = false;
-    bool     Q = false;
-    bool     S = false;
-    bool     D = false;
+    bool     Z      = false;
+    bool     Q      = false;
+    bool     S      = false;
+    bool     D      = false;
+    bool     ESCAPE = false;
+
+    float m_guiLightAdjustment = 1.f;
+
+    int m_boidNumModel     = 2;
+    int m_environmentModel = 1;
 
 public:
     GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);
@@ -31,6 +37,4 @@ public:
     ShadowCubeMapFBO m_shadowMap;
     void             draw(p6::Context& ctx);
     void             deleteBuffers();
-
-    // const p6::Shader GLContext::loadShaders();
 };
