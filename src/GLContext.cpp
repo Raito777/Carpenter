@@ -23,7 +23,6 @@ GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer)
     glEnable(GL_DEPTH_TEST);
 
     m_shadowMap.Init(2048);
-    std::cout << "1 : " << &m_shadowMap << "\n";
 
     this->m_renderer = Renderer(ctx, boidsContainer);
 
@@ -113,7 +112,6 @@ void GLContext::draw(p6::Context& ctx)
         this->m_renderer.m_scene.setEnvironmentModel(this->m_environmentModel);
         this->m_renderer.updateEnvironmentVbo();
 
-        std::cout << m_lightColor[0] << "`\n";
         this->m_renderer.m_scene.setLight1Intensity(this->m_guiLightAdjustment);
         this->m_renderer.m_scene.setLightColor(this->m_lightColor, this->m_guiLightAdjustment);
     }

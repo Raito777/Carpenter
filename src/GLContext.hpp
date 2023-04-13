@@ -27,8 +27,8 @@ private:
     bool     ESCAPE = false;
 
     float m_guiLightAdjustment = 50.f;
-    float m_lightColor[3]      = {0.5, 0.3, 0.3};
-    int   m_boidNumModel       = 2;
+    float m_lightColor[3]      = {1, 0.3, 0.3};
+    int   m_boidNumModel       = 3;
     int   m_environmentModel   = 1;
 
 public:

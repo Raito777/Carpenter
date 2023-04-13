@@ -98,7 +98,6 @@ void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 {
     // ctx.render_to_main_canvas();
     this->m_shadowProgram.m_Program.use();
-    std::cout << "2 : " << &shadowMap << "\n";
 
     this->m_scene.updateGlints(ctx, this->m_shadowProgram.m_Program.id());
     for (size_t i = 0; i < 6; i++)
@@ -185,15 +184,13 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     glUniform3fv(this->m_scene.m_boidLightTexture.uKs, 1, glm::value_ptr(this->m_scene.m_boidLightTexture._uKs[0]));
     glUniform1f(this->m_scene.m_boidLightTexture.uShininess, this->m_scene.m_boidLightTexture._uShininess[0]);
 
-    std::cout << "3 : " << &shadowMap << "\n";
-
     for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
     {
         shadowMap.BindForReading(GL_TEXTURE1);
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
-        this->m_boidsContainer[i].moove(ctx);
+        // this->m_boidsContainer[i].moove(ctx);
         this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
         // this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
 

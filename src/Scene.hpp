@@ -87,7 +87,11 @@ struct objectTexture {
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-
+    void setTexture(std::filesystem::path file_path)
+    {
+        this->imgTexture = p6::load_image_buffer(file_path);
+        genTexture();
+    }
     void bindTexture(GLenum textureUnit)
     {
         glActiveTexture(textureUnit);
@@ -136,14 +140,24 @@ public:
     int shadow_height = 4096;
 
     std::vector<glimac::ShapeVertex> m_boidModel;
-    modelTransformations             m_boidsTransformations;
-    lightTexture                     m_boidLightTexture;
-    objectTexture                    m_boidTextures = objectTexture("./assets/textures/bat.png");
+    std::vector<glimac::ShapeVertex> m_boidModel1;
+    std::vector<glimac::ShapeVertex> m_boidModel2;
+    std::vector<glimac::ShapeVertex> m_boidModel3;
+
+    modelTransformations m_boidsTransformations;
+    lightTexture         m_boidLightTexture;
+    objectTexture        m_boidTextures = objectTexture("./assets/textures/batDetailed.jpg");
+    // objectTexture        m_boidTextures1 = objectTexture("./assets/textures/bat.png");
+    // objectTexture        m_boidTextures2 = objectTexture("./assets/textures/defaultTexture.png");
+    // objectTexture        m_boidTextures3 = objectTexture("./assets/textures/batDetailed.jpg");
 
     std::vector<glimac::ShapeVertex> m_environmentModel;
-    modelTransformations             m_environmentTransformations;
-    lightTexture                     m_environmentLightTexture;
-    objectTexture                    m_environmentTextures = objectTexture("./assets/textures/defaultTexture.png");
+    std::vector<glimac::ShapeVertex> m_environmentModel1;
+    std::vector<glimac::ShapeVertex> m_environmentModel2;
+
+    modelTransformations m_environmentTransformations;
+    lightTexture         m_environmentLightTexture;
+    objectTexture        m_environmentTextures = objectTexture("./assets/textures/defaultTexture.png");
 
     std::vector<glimac::ShapeVertex> m_characterModel;
     modelTransformations             m_characterTransformations;
@@ -164,10 +178,17 @@ public:
         m_boidTextures.updateGlint(shaderId);
         m_environmentTextures.updateGlint(shaderId);
 
-        this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
+        this->m_boidModel1 = loadOBJ("./assets/models/BatLow.obj");
+        this->m_boidModel2 = loadOBJ("./assets/models/BatMid.obj");
+        this->m_boidModel3 = loadOBJ("./assets/models/BatDetailed.obj");
+
+        this->m_boidModel = this->m_boidModel3;
 
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
-        this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
+        this->m_environmentModel1 = loadOBJ("./assets/models/close-cube.obj");
+        this->m_environmentModel2 = loadOBJ("./assets/models/modular-cube.obj");
+
+        this->m_environmentModel = this->m_environmentModel1;
 
         this->m_characterModel = loadOBJ("./assets/models/Robik.obj");
 
@@ -201,7 +222,7 @@ public:
         // couleur spéculaire reflétée dans une direction spécifique en fonction de l'angle de la
         this->m_boidLightTexture._uKs.push_back(glm::vec3(0.2f, 0.2f, 0.2f));
         // rugositée
-        this->m_boidLightTexture._uShininess.push_back(0.1f);
+        this->m_boidLightTexture._uShininess.push_back(1.f);
 
         this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
@@ -238,16 +259,19 @@ public:
     {
         if (boidNumModel == 1)
         {
-            this->m_boidModel = glimac::cone_vertices(1.f, 0.5f, 16, 32);
+            this->m_boidModel = this->m_boidModel1;
+            this->m_boidTextures.setTexture("./assets/textures/bat.png");
         }
 
         if (boidNumModel == 2)
         {
-            this->m_boidModel = loadOBJ("./assets/models/BatTest.obj");
+            this->m_boidModel = this->m_boidModel2;
+            this->m_boidTextures.setTexture("./assets/textures/defaultTexture.png");
         }
         if (boidNumModel == 3)
         {
-            this->m_boidModel = loadOBJ("./assets/models/bat2.obj");
+            this->m_boidModel = this->m_boidModel3;
+            this->m_boidTextures.setTexture("./assets/textures/batDetailed.jpg");
         }
     }
 
@@ -255,12 +279,12 @@ public:
     {
         if (environmentModel == 1)
         {
-            this->m_environmentModel = loadOBJ("./assets/models/close-cube.obj");
+            this->m_environmentModel = this->m_environmentModel1;
         }
 
         if (environmentModel == 2)
         {
-            this->m_environmentModel = loadOBJ("./assets/models/modular-cube.obj");
+            this->m_environmentModel = this->m_environmentModel2;
         }
     }
 
