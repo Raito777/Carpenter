@@ -20,6 +20,7 @@ struct sceneLightSetup {
     GLint uAmbient;
 
     glm::vec3 _uLightIntensity;
+    glm::vec3 lightColor;
     glm::vec3 initialLightIntensity;
     glm::vec3 _lightPos;
     glm::vec3 initialLightPos;
@@ -175,8 +176,9 @@ public:
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight._uLightIntensity      = glm::vec3(60.f, 30.f, 30.f);
-        m_pointLight.initialLightIntensity = m_pointLight._uLightIntensity;
+        m_pointLight.lightColor            = glm::vec3(1, 0.3, 0.3);
+        m_pointLight._uLightIntensity      = m_pointLight.lightColor * 50.f;
+        m_pointLight.initialLightIntensity = m_pointLight.lightColor * 50.f;
 
         m_pointLight._uAmbient = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -260,5 +262,11 @@ public:
         {
             this->m_environmentModel = loadOBJ("./assets/models/modular-cube.obj");
         }
+    }
+
+    void setLightColor(float* lightColor, float lightAdjustment)
+    {
+        glm::vec3 vecLightColor(lightColor[0], lightColor[1], lightColor[2]);
+        m_pointLight._uLightIntensity = vecLightColor * lightAdjustment;
     }
 };

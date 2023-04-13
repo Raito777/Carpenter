@@ -26,10 +26,10 @@ private:
     bool     D      = false;
     bool     ESCAPE = false;
 
-    float m_guiLightAdjustment = 1.f;
-
-    int m_boidNumModel     = 2;
-    int m_environmentModel = 1;
+    float m_guiLightAdjustment = 50.f;
+    float m_lightColor[3]      = {0.5, 0.3, 0.3};
+    int   m_boidNumModel       = 2;
+    int   m_environmentModel   = 1;
 
 public:
     GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);

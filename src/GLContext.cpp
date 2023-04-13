@@ -84,7 +84,8 @@ GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer)
 void GLContext::draw(p6::Context& ctx)
 {
     ImGui::Begin("Settings");
-    ImGui::SliderFloat("Light 1 intensity", &this->m_guiLightAdjustment, 0.f, 10.f);
+    ImGui::ColorEdit3("Color", m_lightColor);
+    ImGui::SliderFloat("Light 1 intensity", &this->m_guiLightAdjustment, 0.f, 500.f);
     ImGui::Text("Boid model %d", m_boidNumModel);
     ImGui::RadioButton("Model boid 1", &m_boidNumModel, 1);
     ImGui::SameLine();
@@ -111,7 +112,10 @@ void GLContext::draw(p6::Context& ctx)
         this->m_renderer.updateBoidVbo();
         this->m_renderer.m_scene.setEnvironmentModel(this->m_environmentModel);
         this->m_renderer.updateEnvironmentVbo();
+
+        std::cout << m_lightColor[0] << "`\n";
         this->m_renderer.m_scene.setLight1Intensity(this->m_guiLightAdjustment);
+        this->m_renderer.m_scene.setLightColor(this->m_lightColor, this->m_guiLightAdjustment);
     }
 
     if (this->Z)
