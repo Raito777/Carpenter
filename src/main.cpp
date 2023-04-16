@@ -24,20 +24,8 @@ int main()
     /*********************************
      * HERE SHOULD COME THE INITIALIZATION CODE
      *********************************/
-    Environment environment(5, 2.5, 2.5);
 
-    std::vector<Boid> boids;
-
-    for (size_t i = 0; i < 20; i++)
-    {
-        glm::vec3 position{p6::random::number(-environment.m_sizeX, environment.m_sizeX), p6::random::number(-environment.m_sizeY, environment.m_sizeY), p6::random::number(-environment.m_sizeZ, environment.m_sizeZ)};
-        float     size = 0.1f;
-        // float size = 0.1f;
-        Boid boid(position, size);
-        boids.push_back(boid);
-    }
-
-    GLContext glContext(ctx, boids);
+    GLContext glContext(ctx);
 
     // Declare your infinite update loop.
 

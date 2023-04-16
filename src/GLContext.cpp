@@ -17,14 +17,14 @@
 #include "imgui.h"
 #include "p6/p6.h"
 
-GLContext::GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer)
+GLContext::GLContext(p6::Context& ctx)
 {
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 
     m_shadowMap.Init(2048);
 
-    this->m_renderer = Renderer(ctx, boidsContainer);
+    this->m_renderer = Renderer(ctx);
 
     ctx.mouse_scrolled = [&](p6::MouseScroll data) {
         this->m_renderer.m_scene.m_camera.moveFront(data.dy);

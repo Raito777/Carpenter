@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <vector>
+#include "Boid.hpp"
 #include "Character.hpp"
 #include "Environment.hpp"
 #include "OBJLoader.hpp"
@@ -139,6 +140,8 @@ public:
     int shadow_width  = 4096;
     int shadow_height = 4096;
 
+    std::vector<Boid> m_boids;
+
     std::vector<glimac::ShapeVertex> m_boidModel;
     std::vector<glimac::ShapeVertex> m_boidModel1;
     std::vector<glimac::ShapeVertex> m_boidModel2;
@@ -192,8 +195,6 @@ public:
 
         this->m_characterModel = loadOBJ("./assets/models/Robik.obj");
 
-        m_environment = Environment(10, 5, 10);
-
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
@@ -231,6 +232,17 @@ public:
         this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
         this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
         this->m_characterLightTexture._uShininess.push_back(0.1f);
+
+        m_environment = Environment(15, 8, 10);
+
+        for (size_t i = 0; i < 50; i++)
+        {
+            glm::vec3 position{p6::random::number(-m_environment.m_sizeX, m_environment.m_sizeX), p6::random::number(-m_environment.m_sizeY, m_environment.m_sizeY), p6::random::number(-m_environment.m_sizeZ, m_environment.m_sizeZ)};
+            float     size = 0.1f;
+            // float size = 0.1f;
+            Boid boid(position, size);
+            m_boids.push_back(boid);
+        }
     };
 
     void updateGlints(p6::Context& ctx, const unsigned int shaderId)

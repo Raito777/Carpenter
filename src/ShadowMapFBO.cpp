@@ -5,8 +5,8 @@ ShadowCubeMapFBO::ShadowCubeMapFBO() = default;
 
 ShadowCubeMapFBO::~ShadowCubeMapFBO()
 {
-    // glDeleteFramebuffers(1, &m_fbo);
-    // glDeleteTextures(1, &m_shadowCubeMap);
+    glDeleteFramebuffers(1, &m_fbo);
+    glDeleteTextures(1, &m_shadowCubeMap);
     // // glDeleteTextures(1, &m_depth);
 }
 

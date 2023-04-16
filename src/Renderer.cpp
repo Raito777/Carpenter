@@ -2,10 +2,8 @@
 #include <iostream>
 #include "glm/fwd.hpp"
 
-Renderer::Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer)
+Renderer::Renderer(p6::Context& ctx)
 {
-    this->m_boidsContainer = boidsContainer;
-
     this->m_shader = p6::load_shader("shaders/3D.vs.glsl", "shaders/pointlight.fs.glsl");
     this->m_shader.use();
 
@@ -184,31 +182,31 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     glUniform3fv(this->m_scene.m_boidLightTexture.uKs, 1, glm::value_ptr(this->m_scene.m_boidLightTexture._uKs[0]));
     glUniform1f(this->m_scene.m_boidLightTexture.uShininess, this->m_scene.m_boidLightTexture._uShininess[0]);
 
-    for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
+    for (size_t i = 0; i < this->m_scene.m_boids.size(); i++)
     {
         shadowMap.BindForReading(GL_TEXTURE1);
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
-        // this->m_boidsContainer[i].moove(ctx);
-        this->m_boidsContainer[i].checkBorder(ctx, this->m_scene.m_environment);
-        // this->m_boidsContainer[i].avoidCharacter(ctx, this->m_scene.m_character);
+        this->m_scene.m_boids[i].moove(ctx);
+        this->m_scene.m_boids[i].checkBorder(ctx, this->m_scene.m_environment);
+        // this->m_scene.m_boids[i].avoidCharacter(ctx, this->m_scene.m_character);
 
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
-        glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
+        glm::vec3 direction = glm::normalize(this->m_scene.m_boids[i].m_direction);
         glm::vec3 up        = glm::vec3(0.0f, 0.0f, 1.0f); // boids orientés vers le haut par défaut
         glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
         float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
 
-        this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_boidsContainer[i].m_position);
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_boids[i].m_position);
         this->m_scene.m_boidsTransformations.MVMatrix = glm::translate(this->m_scene.m_boidsTransformations.MVMatrix, -this->m_scene.m_character.m_position);
         this->m_scene.m_boidsTransformations.MVMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MVMatrix, angle, axis);
-        this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
+        this->m_scene.m_boidsTransformations.MVMatrix = glm::scale(this->m_scene.m_boidsTransformations.MVMatrix, glm::vec3(this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size));
 
-        this->m_scene.m_boidsTransformations.MMatrix = glm::translate(glm::mat4(1.f), this->m_boidsContainer[i].m_position);
+        this->m_scene.m_boidsTransformations.MMatrix = glm::translate(glm::mat4(1.f), this->m_scene.m_boids[i].m_position);
         this->m_scene.m_boidsTransformations.MMatrix = glm::translate(this->m_scene.m_boidsTransformations.MMatrix, -this->m_scene.m_character.m_position);
         this->m_scene.m_boidsTransformations.MMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MMatrix, angle, axis);
-        this->m_scene.m_boidsTransformations.MMatrix = glm::scale(this->m_scene.m_boidsTransformations.MMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
+        this->m_scene.m_boidsTransformations.MMatrix = glm::scale(this->m_scene.m_boidsTransformations.MMatrix, glm::vec3(this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size));
 
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.MMatrix));
 
@@ -230,17 +228,17 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
 void Renderer::renderBoidsShadows(p6::Context& ctx)
 {
-    for (size_t i = 0; i < this->m_boidsContainer.size(); i++)
+    for (size_t i = 0; i < this->m_scene.m_boids.size(); i++)
     {
-        glm::vec3 direction = glm::normalize(this->m_boidsContainer[i].m_direction);
+        glm::vec3 direction = glm::normalize(this->m_scene.m_boids[i].m_direction);
         glm::vec3 up        = glm::vec3(0.0f, 0.0f, 1.0f); // boids orientés vers le haut par défaut
         glm::vec3 axis      = glm::normalize(glm::cross(up, direction));
         float     angle     = glm::radians(glm::degrees(glm::acos(glm::dot(up, direction))));
 
-        this->m_scene.m_boidsTransformations.MMatrix = glm::translate(glm::mat4(1.f), this->m_boidsContainer[i].m_position);
+        this->m_scene.m_boidsTransformations.MMatrix = glm::translate(glm::mat4(1.f), this->m_scene.m_boids[i].m_position);
         this->m_scene.m_boidsTransformations.MMatrix = glm::translate(this->m_scene.m_boidsTransformations.MMatrix, -this->m_scene.m_character.m_position);
         this->m_scene.m_boidsTransformations.MMatrix = glm::rotate(this->m_scene.m_boidsTransformations.MMatrix, angle, axis);
-        this->m_scene.m_boidsTransformations.MMatrix = glm::scale(this->m_scene.m_boidsTransformations.MMatrix, glm::vec3(this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size, this->m_boidsContainer[i].m_size));
+        this->m_scene.m_boidsTransformations.MMatrix = glm::scale(this->m_scene.m_boidsTransformations.MMatrix, glm::vec3(this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size, this->m_scene.m_boids[i].m_size));
 
         glUniform1f(m_shadowProgram.ufar_plane, m_far);
         glUniform3fv(m_shadowProgram.uLightPos, 1, glm::value_ptr(this->m_scene.m_pointLight._lightPos));

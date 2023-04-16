@@ -32,7 +32,7 @@ private:
     int   m_environmentModel   = 1;
 
 public:
-    GLContext(p6::Context& ctx, std::vector<Boid>& boidsContainer);
+    GLContext(p6::Context& ctx);
 
     ShadowCubeMapFBO m_shadowMap;
     void             draw(p6::Context& ctx);

@@ -68,11 +68,10 @@ private:
     void renderCharacterShadows(p6::Context& ctx);
 
 public:
-    std::vector<Boid> m_boidsContainer;
-    Scene             m_scene;
+    Scene m_scene;
 
     Renderer(){};
-    Renderer(p6::Context& ctx, std::vector<Boid> boidsContainer);
+    Renderer(p6::Context& ctx);
 
     void render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void updateBoidVbo();
