@@ -153,7 +153,7 @@ public:
     // objectTexture        m_boidTextures1 = objectTexture("./assets/textures/bat.png");
     // objectTexture        m_boidTextures2 = objectTexture("./assets/textures/defaultTexture.png");
     // objectTexture        m_boidTextures3 = objectTexture("./assets/textures/batDetailed.jpg");
-
+    std::vector<glimac::ShapeVertex> m_cageModel;
     std::vector<glimac::ShapeVertex> m_environmentModel;
     std::vector<glimac::ShapeVertex> m_environmentModel1;
     std::vector<glimac::ShapeVertex> m_environmentModel2;
@@ -165,9 +165,12 @@ public:
     std::vector<glimac::ShapeVertex> m_characterModel;
     modelTransformations             m_characterTransformations;
     lightTexture                     m_characterLightTexture;
+    objectTexture                    m_characterTexture = objectTexture("./assets/textures/robot.jpg");
 
     Environment m_environment;
-    Character   m_character;
+    Environment m_cage;
+
+    Character m_character;
 
     sceneLightSetup m_pointLight;
     sceneLightSetup m_dirLight;
@@ -188,21 +191,23 @@ public:
         this->m_boidModel = this->m_boidModel3;
 
         // this->m_boidModel        = glimac::cone_vertices(1.f, 0.5f, 16, 32);
-        this->m_environmentModel1 = loadOBJ("./assets/models/close-cube.obj");
+        this->m_environmentModel1 = loadOBJ("./assets/models/cave_v1.obj");
         this->m_environmentModel2 = loadOBJ("./assets/models/modular-cube.obj");
 
         this->m_environmentModel = this->m_environmentModel1;
 
-        this->m_characterModel = loadOBJ("./assets/models/Robik.obj");
+        this->m_cageModel = this->m_environmentModel2;
+
+        this->m_characterModel = loadOBJ("./assets/models/robot.obj");
 
         m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
         m_pointLight.initialLightPos = m_pointLight._lightPos;
 
-        m_pointLight.lightColor            = glm::vec3(1, 0.3, 0.3);
-        m_pointLight._uLightIntensity      = m_pointLight.lightColor * 50.f;
-        m_pointLight.initialLightIntensity = m_pointLight.lightColor * 50.f;
+        m_pointLight.lightColor            = glm::vec3(0.7, 0.5, 0.5);
+        m_pointLight._uLightIntensity      = m_pointLight.lightColor * 70.f;
+        m_pointLight.initialLightIntensity = m_pointLight.lightColor * 70.f;
 
-        m_pointLight._uAmbient = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_pointLight._uAmbient = glm::vec3(0.08f, 0.08f, 0.08f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
         m_dirLight._uLightIntensity = glm::vec3(0.f, 0.f, 0.f);
@@ -225,15 +230,16 @@ public:
         // rugositée
         this->m_boidLightTexture._uShininess.push_back(1.f);
 
-        this->m_environmentLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
-        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
-        this->m_environmentLightTexture._uShininess.push_back(0.1f);
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(9.f, 9.f, 9.f));
+        this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.01f, 0.01f, 0.01f));
+        this->m_environmentLightTexture._uShininess.push_back(0.05f);
 
         this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
         this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
-        this->m_characterLightTexture._uShininess.push_back(0.1f);
+        this->m_characterLightTexture._uShininess.push_back(0.5f);
 
-        m_environment = Environment(15, 8, 10);
+        this->m_environment = Environment(1, 1, 1);
+        this->m_cage        = Environment(5, 5, 20);
 
         for (size_t i = 0; i < 50; i++)
         {

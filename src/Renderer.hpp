@@ -43,10 +43,12 @@ class Renderer {
 private:
     GLVbo m_vboBoids;
     GLVbo m_vboEnvironment;
+    GLVbo m_vboCage;
     GLVbo m_vboCharacter;
 
     GLVao m_vaoBoids;
     GLVao m_vaoEnvironment;
+    GLVao m_vaoCage;
     GLVao m_vaoCharacter;
 
     p6::Shader                   m_shader     = p6::load_shader("shaders/3D.vs.glsl", "shaders/normals.fs.glsl");
@@ -66,6 +68,7 @@ private:
     void renderEnvironmentShadows(p6::Context& ctx);
     void renderCharacter(p6::Context& ctx, ShadowCubeMapFBO& shadowMap);
     void renderCharacterShadows(p6::Context& ctx);
+    void renderCage(p6::Context& ctx);
 
 public:
     Scene m_scene;

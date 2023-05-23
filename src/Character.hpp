@@ -14,9 +14,9 @@ private:
 public:
     float m_speed  = 10.f;
     float m_angleY = 0.f;
-    float m_sizeX  = 0.02f;
-    float m_sizeY  = 0.02f;
-    float m_sizeZ  = 0.02f;
+    float m_sizeX  = 0.5f;
+    float m_sizeY  = 0.5f;
+    float m_sizeZ  = 0.5f;
 
     glm::vec3 m_direction = glm::vec3(0, 0, 0);
     glm::vec3 m_position  = glm::vec3(0, 0, 20);

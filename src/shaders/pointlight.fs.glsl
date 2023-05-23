@@ -65,7 +65,7 @@ float calcShadowFactorPointLight() {
     float bias = 0.025;
 
     if ((SampledDistance + bias) < Distance) {
-        return 0.05;
+        return 0.5;
     }
     else {
         return 1.0;

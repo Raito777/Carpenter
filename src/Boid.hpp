@@ -14,7 +14,7 @@ private:
 public:
     glm::vec3 m_position;
     glm::vec3 m_direction = glm::vec3(p6::random::number(-1, 1), p6::random::number(-1, 1), p6::random::number(-1, 1));
-    float     m_speed     = 1.5f;
+    float     m_speed     = 3.5f;
 
     float m_size = 0.1f;
     Boid()

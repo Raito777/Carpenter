@@ -21,6 +21,10 @@ Renderer::Renderer(p6::Context& ctx)
     glBufferData(GL_ARRAY_BUFFER, this->m_scene.m_characterModel.size() * sizeof(glimac::ShapeVertex), this->m_scene.m_characterModel.data(), GL_STATIC_DRAW);
     this->m_vboCharacter.unBind();
 
+    this->m_vboCage.bind();
+    glBufferData(GL_ARRAY_BUFFER, this->m_scene.m_cageModel.size() * sizeof(glimac::ShapeVertex), this->m_scene.m_cageModel.data(), GL_STATIC_DRAW);
+    this->m_vboCage.unBind();
+
     static constexpr GLuint VERTEX_ATTR_POSITION  = 0;
     static constexpr GLuint VERTEX_ATTR_COLOR     = 1;
     static constexpr GLuint VERTEX_ATTR_TEXCOORDS = 2;
@@ -69,6 +73,21 @@ Renderer::Renderer(p6::Context& ctx)
 
     this->m_vboCharacter.unBind();
     this->m_vaoCharacter.unBind();
+
+    this->m_vaoCage.bind();
+
+    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
+    glEnableVertexAttribArray(VERTEX_ATTR_COLOR);
+    glEnableVertexAttribArray(VERTEX_ATTR_TEXCOORDS);
+
+    this->m_vboCage.bind();
+
+    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, position)));
+    glVertexAttribPointer(VERTEX_ATTR_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, normal)));
+    glVertexAttribPointer(VERTEX_ATTR_TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (const GLvoid*)(offsetof(glimac::ShapeVertex, texCoords)));
+
+    this->m_vboCage.unBind();
+    this->m_vaoCage.unBind();
 
     this->m_cameraDirections = {
         {GL_TEXTURE_CUBE_MAP_POSITIVE_X, 180.f, -90.f},
@@ -148,14 +167,19 @@ void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     this->m_vaoBoids.bind();
     this->renderBoids(ctx, shadowMap);
     this->m_vaoBoids.unBind();
+
+    this->m_vaoCage.bind();
+    this->renderCage(ctx);
+    this->m_vaoCage.unBind();
 }
 
 void Renderer::renderLights(p6::Context& ctx)
 {
     glm::vec3 uMVLightsPos;
 
-    //pointlight on character
-    this->m_scene.m_pointLight.initialLightPos = glm::vec3(this->m_scene.m_character.m_position.x, this->m_scene.m_character.m_position.y + 0.5f, this->m_scene.m_character.m_position.z);
+    // pointlight on character
+    this->m_scene.m_pointLight.initialLightPos = glm::vec3(this->m_scene.m_character.m_position.x, this->m_scene.m_character.m_position.y, this->m_scene.m_character.m_position.z - 1.f);
+    // this->m_scene.m_pointLight.initialLightPos = glm::vec3(this->m_scene.m_character.m_position.x, this->m_scene.m_character.m_position.y, this->m_scene.m_character.m_position.z - 1.f);
 
     this->m_scene.m_pointLight._lightPos = this->m_scene.m_pointLight.initialLightPos - this->m_scene.m_character.m_position;
 
@@ -189,7 +213,7 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
         this->m_scene.m_boids[i].moove(ctx);
-        this->m_scene.m_boids[i].checkBorder(ctx, this->m_scene.m_environment);
+        this->m_scene.m_boids[i].checkBorder(ctx, this->m_scene.m_cage);
         // this->m_scene.m_boids[i].avoidCharacter(ctx, this->m_scene.m_character);
 
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION
@@ -282,6 +306,21 @@ void Renderer::renderEnvironment(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+void Renderer::renderCage(p6::Context& ctx)
+{
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_cage.m_position);
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_environmentTransformations.MVMatrix, -this->m_scene.m_character.m_position);
+
+    // this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_scene.m_cage.m_sizeX, this->m_scene.m_cage.m_sizeY, this->m_scene.m_cage.m_sizeZ));
+
+    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.ProjMatrix * this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MMatrix));
+
+    glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_cageModel.size());
+}
+
 void Renderer::renderEnvironmentShadows(p6::Context& ctx)
 {
     this->m_scene.m_environmentTransformations.MMatrix = glm::translate(glm::mat4(1.f), this->m_scene.m_environment.m_position);
@@ -299,6 +338,7 @@ void Renderer::renderEnvironmentShadows(p6::Context& ctx)
 void Renderer::renderCharacter(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 {
     shadowMap.BindForReading(GL_TEXTURE1);
+    this->m_scene.m_characterTexture.bindTexture(GL_TEXTURE0);
 
     float angleY = glm::radians(-this->m_scene.m_camera.getAngleY());
 
@@ -328,7 +368,8 @@ void Renderer::renderCharacter(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
     glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_characterModel.size());
 
-    glActiveTexture(GL_TEXTURE1);
+    this->m_scene.m_characterTexture.unbindTexture();
+
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
