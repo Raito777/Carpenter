@@ -12,19 +12,14 @@
 class Character {
 private:
 public:
-    float m_sizeX = 0.02f;
-    float m_sizeY = 0.02f;
-    float m_sizeZ = 0.02f;
-
-    float safetyDistance = 1.f;
-
-    float m_speed = 10.f;
-
+    float m_speed  = 10.f;
     float m_angleY = 0.f;
+    float m_sizeX  = 0.02f;
+    float m_sizeY  = 0.02f;
+    float m_sizeZ  = 0.02f;
 
     glm::vec3 m_direction = glm::vec3(0, 0, 0);
-
-    glm::vec3 m_position = glm::vec3(0, 0, 20);
+    glm::vec3 m_position  = glm::vec3(0, 0, 20);
 
     Character(){
 

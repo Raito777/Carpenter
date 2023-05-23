@@ -154,8 +154,8 @@ void Renderer::renderLights(p6::Context& ctx)
 {
     glm::vec3 uMVLightsPos;
 
-    // playing a bit
-    this->m_scene.m_pointLight.initialLightPos.x = glm::sin(ctx.time()) * 5;
+    //pointlight on character
+    this->m_scene.m_pointLight.initialLightPos = glm::vec3(this->m_scene.m_character.m_position.x, this->m_scene.m_character.m_position.y + 0.5f, this->m_scene.m_character.m_position.z);
 
     this->m_scene.m_pointLight._lightPos = this->m_scene.m_pointLight.initialLightPos - this->m_scene.m_character.m_position;
 
