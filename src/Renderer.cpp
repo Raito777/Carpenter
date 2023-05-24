@@ -164,13 +164,13 @@ void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     this->renderEnvironment(ctx, shadowMap);
     this->m_vaoEnvironment.unBind();
 
-    this->m_vaoBoids.bind();
-    this->renderBoids(ctx, shadowMap);
-    this->m_vaoBoids.unBind();
-
     this->m_vaoCage.bind();
     this->renderCage(ctx);
     this->m_vaoCage.unBind();
+
+    this->m_vaoBoids.bind();
+    this->renderBoids(ctx, shadowMap);
+    this->m_vaoBoids.unBind();
 }
 
 void Renderer::renderLights(p6::Context& ctx)
@@ -183,7 +183,7 @@ void Renderer::renderLights(p6::Context& ctx)
 
     this->m_scene.m_pointLight._lightPos = this->m_scene.m_pointLight.initialLightPos - this->m_scene.m_character.m_position;
 
-    uMVLightsPos = glm::vec3(this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
+    uMVLightsPos = glm::vec3(-this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
 
     glUniform3fv(this->m_scene.m_pointLight.uLightPos_vs, 1, glm::value_ptr(uMVLightsPos));
     glUniform3fv(this->m_scene.m_pointLight.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_pointLight._uLightIntensity));
@@ -240,6 +240,8 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.ProjMatrix * this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.MVMatrix));
+
+        this->m_scene.m_boidsTransformations.NormalMatrix = glm::transpose(glm::inverse(this->m_scene.m_boidsTransformations.MVMatrix));
         glUniformMatrix4fv(this->m_scene.m_boidsTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_boidsTransformations.NormalMatrix));
 
         glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_boidModel.size());
@@ -291,6 +293,9 @@ void Renderer::renderEnvironment(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
     glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.ProjMatrix * this->m_scene.m_environmentTransformations.MVMatrix));
     glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
 
+    this->m_scene.m_environmentTransformations.NormalMatrix = glm::transpose(glm::inverse(this->m_scene.m_environmentTransformations.MVMatrix));
+    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.NormalMatrix));
+
     glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MMatrix));
 
     glUniform1f(this->m_scene.m_environmentLightTexture.ufar_plane, m_far);
@@ -308,15 +313,19 @@ void Renderer::renderEnvironment(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
 void Renderer::renderCage(p6::Context& ctx)
 {
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_cage.m_position);
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::translate(this->m_scene.m_environmentTransformations.MVMatrix, -this->m_scene.m_character.m_position);
+    this->m_scene.m_cageTransformations.MVMatrix = glm::translate(this->m_scene.m_camera.getViewMatrix(), this->m_scene.m_cage.m_position);
+    this->m_scene.m_cageTransformations.MVMatrix = glm::translate(this->m_scene.m_cageTransformations.MVMatrix, -this->m_scene.m_character.m_position);
 
-    // this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_environmentTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-    this->m_scene.m_environmentTransformations.MVMatrix = glm::scale(this->m_scene.m_environmentTransformations.MVMatrix, glm::vec3(this->m_scene.m_cage.m_sizeX, this->m_scene.m_cage.m_sizeY, this->m_scene.m_cage.m_sizeZ));
+    // this->m_scene.m_environmentTransformations.MVMatrix = glm::rotate(this->m_scene.m_cageTransformations.MVMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    this->m_scene.m_cageTransformations.MVMatrix = glm::scale(this->m_scene.m_cageTransformations.MVMatrix, glm::vec3(this->m_scene.m_cage.m_sizeX, this->m_scene.m_cage.m_sizeY, this->m_scene.m_cage.m_sizeZ));
 
-    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.ProjMatrix * this->m_scene.m_environmentTransformations.MVMatrix));
-    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MVMatrix));
-    glUniformMatrix4fv(this->m_scene.m_environmentTransformations.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_environmentTransformations.MMatrix));
+    glUniformMatrix4fv(this->m_scene.m_cageTransformations.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_cageTransformations.ProjMatrix * this->m_scene.m_cageTransformations.MVMatrix));
+    glUniformMatrix4fv(this->m_scene.m_cageTransformations.uMVMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_cageTransformations.MVMatrix));
+
+    this->m_scene.m_cageTransformations.NormalMatrix = glm::transpose(glm::inverse(this->m_scene.m_cageTransformations.MVMatrix));
+    glUniformMatrix4fv(this->m_scene.m_cageTransformations.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_cageTransformations.NormalMatrix));
+
+    glUniformMatrix4fv(this->m_scene.m_cageTransformations.uMMatrix, 1, GL_FALSE, glm::value_ptr(this->m_scene.m_cageTransformations.MMatrix));
 
     glDrawArrays(GL_TRIANGLES, 0, this->m_scene.m_cageModel.size());
 }

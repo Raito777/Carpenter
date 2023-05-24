@@ -129,7 +129,7 @@ struct modelTransformations {
         this->uMMatrix      = glGetUniformLocation(shaderId, "uMMatrix");
 
         this->ProjMatrix   = glm::perspective(glm::radians(70.f), (GLfloat)ctx.aspect_ratio(), 0.1f, 100.f);
-        this->MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2));
+        this->MVMatrix     = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
         this->NormalMatrix = glm::transpose(glm::inverse(this->MVMatrix));
     }
 };
@@ -161,6 +161,10 @@ public:
     modelTransformations m_environmentTransformations;
     lightTexture         m_environmentLightTexture;
     objectTexture        m_environmentTextures = objectTexture("./assets/textures/defaultTexture.png");
+
+    modelTransformations m_cageTransformations;
+    lightTexture         m_cageLightTexture;
+    objectTexture        m_cageTextures = objectTexture("./assets/textures/defaultTexture.png");
 
     std::vector<glimac::ShapeVertex> m_characterModel;
     modelTransformations             m_characterTransformations;
@@ -206,8 +210,7 @@ public:
         m_pointLight.lightColor            = glm::vec3(0.7, 0.5, 0.5);
         m_pointLight._uLightIntensity      = m_pointLight.lightColor * 70.f;
         m_pointLight.initialLightIntensity = m_pointLight.lightColor * 70.f;
-
-        m_pointLight._uAmbient = glm::vec3(0.08f, 0.08f, 0.08f);
+        m_pointLight._uAmbient             = glm::vec3(0.08f, 0.08f, 0.08f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
         m_dirLight._uLightIntensity = glm::vec3(0.f, 0.f, 0.f);
@@ -217,10 +220,13 @@ public:
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
+        m_cageTransformations.initModelTransformations(ctx, shaderId);
+
         m_characterTransformations.initModelTransformations(ctx, shaderId);
 
         m_boidLightTexture.initLightTexture(shaderId);
         m_environmentLightTexture.initLightTexture(shaderId);
+        m_cageLightTexture.initLightTexture(shaderId);
         m_characterLightTexture.initLightTexture(shaderId);
 
         // couleur reflétée
@@ -230,9 +236,13 @@ public:
         // rugositée
         this->m_boidLightTexture._uShininess.push_back(1.f);
 
-        this->m_environmentLightTexture._uKd.push_back(glm::vec3(9.f, 9.f, 9.f));
+        this->m_environmentLightTexture._uKd.push_back(glm::vec3(5.f, 5.f, 5.f));
         this->m_environmentLightTexture._uKs.push_back(glm::vec3(0.01f, 0.01f, 0.01f));
-        this->m_environmentLightTexture._uShininess.push_back(0.05f);
+        this->m_environmentLightTexture._uShininess.push_back(5.f);
+
+        this->m_cageLightTexture._uKd.push_back(glm::vec3(9.f, 9.f, 9.f));
+        this->m_cageLightTexture._uKs.push_back(glm::vec3(0.01f, 0.01f, 0.01f));
+        this->m_cageLightTexture._uShininess.push_back(0.05f);
 
         this->m_characterLightTexture._uKd.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
         this->m_characterLightTexture._uKs.push_back(glm::vec3(0.1f, 0.1f, 0.1f));
