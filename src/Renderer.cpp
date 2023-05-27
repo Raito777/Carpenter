@@ -176,6 +176,7 @@ void Renderer::render(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 void Renderer::renderLights(p6::Context& ctx)
 {
     glm::vec3 uMVLightsPos;
+    glm::vec3 uMVLightsPos2;
 
     // pointlight on character
     this->m_scene.m_pointLight.initialLightPos = glm::vec3(this->m_scene.m_character.m_position.x, this->m_scene.m_character.m_position.y, this->m_scene.m_character.m_position.z - 1.f);
@@ -183,11 +184,18 @@ void Renderer::renderLights(p6::Context& ctx)
 
     this->m_scene.m_pointLight._lightPos = this->m_scene.m_pointLight.initialLightPos - this->m_scene.m_character.m_position;
 
-    uMVLightsPos = glm::vec3(-this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
+    this->m_scene.m_pointLight2._lightPos = this->m_scene.m_pointLight2.initialLightPos - this->m_scene.m_character.m_position;
+
+    uMVLightsPos  = glm::vec3(-this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight._lightPos, 1));
+    uMVLightsPos2 = glm::vec3(-this->m_scene.m_camera.getViewMatrix() * glm::vec4(this->m_scene.m_pointLight2._lightPos, 1));
 
     glUniform3fv(this->m_scene.m_pointLight.uLightPos_vs, 1, glm::value_ptr(uMVLightsPos));
     glUniform3fv(this->m_scene.m_pointLight.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_pointLight._uLightIntensity));
     glUniform3fv(this->m_scene.m_pointLight.uAmbient, 1, glm::value_ptr(this->m_scene.m_pointLight._uAmbient));
+
+    glUniform3fv(this->m_scene.m_pointLight2.uLightPos_vs, 1, glm::value_ptr(uMVLightsPos2));
+    glUniform3fv(this->m_scene.m_pointLight2.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_pointLight2._uLightIntensity));
+    glUniform3fv(this->m_scene.m_pointLight2.uAmbient, 1, glm::value_ptr(this->m_scene.m_pointLight2._uAmbient));
 
     // glUniform3fv(this->m_scene.m_dirLight.uLightDir_vs, 1, glm::value_ptr(this->m_scene.m_dirLight._lightDir));
     // glUniform3fv(this->m_scene.m_dirLight.uLightIntensity, 1, glm::value_ptr(this->m_scene.m_dirLight._uLightIntensity));
@@ -212,8 +220,7 @@ void Renderer::renderBoids(p6::Context& ctx, ShadowCubeMapFBO& shadowMap)
 
         this->m_scene.m_boidTextures.bindTexture(GL_TEXTURE0);
 
-        this->m_scene.m_boids[i].moove(ctx);
-        this->m_scene.m_boids[i].checkBorder(ctx, this->m_scene.m_cage);
+        this->m_scene.m_boids[i].updatePosition(this->m_scene.m_cage, this->m_scene.m_boids);
         // this->m_scene.m_boids[i].avoidCharacter(ctx, this->m_scene.m_character);
 
         // CALCUL LA ROTATION DU BOIDS EN FONCTION DE SA DIRECTION

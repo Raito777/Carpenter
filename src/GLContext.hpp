@@ -31,10 +31,18 @@ private:
     int   m_boidNumModel       = 3;
     int   m_environmentModel   = 1;
 
+    float m_globalSpeedFactor      = 0.05;
+    float m_globalDetectionFactor  = 1.0;
+    float m_globalAvoidanceFactor  = 1.0;
+    float m_globalSeparationFactor = 1.2;
+    float m_globalAlignmentFactor  = 0.010;
+    float m_globalCohesionFactor   = 0.002;
+
 public:
     GLContext(p6::Context& ctx);
 
     ShadowCubeMapFBO m_shadowMap;
     void             draw(p6::Context& ctx);
     void             deleteBuffers();
+    void             updateSettings();
 };

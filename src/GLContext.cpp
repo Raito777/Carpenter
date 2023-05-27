@@ -52,6 +52,7 @@ GLContext::GLContext(p6::Context& ctx)
             if (this->ESCAPE)
             {
                 this->ESCAPE = false;
+                this->updateSettings();
             }
             else
             {
@@ -79,7 +80,14 @@ GLContext::GLContext(p6::Context& ctx)
         }
     };
 }
-
+void GLContext::updateSettings()
+{
+    // setting the variables that are in gui
+    this->m_renderer.m_scene.setBoidModel(this->m_boidNumModel);
+    this->m_renderer.updateBoidVbo();
+    this->m_renderer.m_scene.setEnvironmentModel(this->m_environmentModel);
+    this->m_renderer.updateEnvironmentVbo();
+}
 void GLContext::draw(p6::Context& ctx)
 {
     ImGui::Begin("Settings");
@@ -97,6 +105,13 @@ void GLContext::draw(p6::Context& ctx)
     ImGui::SameLine();
     ImGui::RadioButton("Model env 2", &m_environmentModel, 2);
 
+    ImGui::SliderFloat("Boids speed", &this->m_globalSpeedFactor, 0.01f, 0.09f);
+    ImGui::SliderFloat("Boids detection factor", &this->m_globalDetectionFactor, 0.1, 2);
+    ImGui::SliderFloat("Boids avoidance factor", &this->m_globalAvoidanceFactor, 0.1, 2);
+    ImGui::SliderFloat("Boids separation factor", &this->m_globalSeparationFactor, 0.1, 5);
+    ImGui::SliderFloat("Boids alignement factor", &this->m_globalAlignmentFactor, 0.005, 0.1);
+    ImGui::SliderFloat("Boids cohesion factor", &this->m_globalCohesionFactor, 0.001, 0.003);
+
     ImGui::End();
 
     if (!this->ESCAPE)
@@ -106,14 +121,13 @@ void GLContext::draw(p6::Context& ctx)
     else
     {
         glfwSetInputMode(ctx.underlying_glfw_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        // setting the variables that are in gui
-        this->m_renderer.m_scene.setBoidModel(this->m_boidNumModel);
-        this->m_renderer.updateBoidVbo();
-        this->m_renderer.m_scene.setEnvironmentModel(this->m_environmentModel);
-        this->m_renderer.updateEnvironmentVbo();
-
         this->m_renderer.m_scene.setLight1Intensity(this->m_guiLightAdjustment);
         this->m_renderer.m_scene.setLightColor(this->m_lightColor, this->m_guiLightAdjustment);
+
+        for (auto& boid : this->m_renderer.m_scene.m_boids)
+        {
+            boid.updateSettings(m_globalSpeedFactor, m_globalDetectionFactor, m_globalAvoidanceFactor, m_globalSeparationFactor, m_globalAlignmentFactor, m_globalCohesionFactor);
+        }
     }
 
     if (this->Z)

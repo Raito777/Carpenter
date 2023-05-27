@@ -14,12 +14,16 @@ uniform vec3 uKs;
 uniform float uShininess;
 
 uniform vec3 uKa_Light1;
-
 uniform vec3 uLightPos_vs_Light1;
 uniform vec3 uLightPos_Light1;
+uniform vec3 uLightIntensity_Light1;
 
-uniform vec3 uLightIntensity_Light1; //Li
 
+uniform vec3 uKa_Light3;
+uniform vec3 uLightPos_vs_Light3;
+uniform vec3 uLightPos_Light3;
+uniform vec3 uLightIntensity_Light3;
+ //Li
 uniform vec3 uKa_Light2;
 uniform vec3 uLightPos_vs_Light2;
 uniform vec3 uLightDir_vs_Light2;
@@ -43,6 +47,17 @@ vec3 pointBlinnPhong() {
         vec3 halfVector = (w0 + wi)/2.f;
         
         return uKa_Light1 + Li*(uKd*max(dot(wi, N), 0.) + uKs*pow(max(dot(halfVector, N), 0.), uShininess));
+}
+
+vec3 pointBlinnPhong2() {
+        float d = distance(vPosition_vs, uLightPos_vs_Light3);
+        vec3 Li = (uLightIntensity_Light3 / (d * d));
+        vec3 N = vNormal_vs;
+        vec3 w0 = normalize(-vPosition_vs);
+        vec3 wi = normalize(uLightPos_vs_Light3 - vPosition_vs);
+        vec3 halfVector = (w0 + wi)/2.f;
+        
+        return uKa_Light3 + Li*(uKd*max(dot(wi, N), 0.) + uKs*pow(max(dot(halfVector, N), 0.), uShininess));
 }
 
 vec3 dirblinnPhong() {
@@ -80,8 +95,8 @@ float SampledDistance = texture(uTexture, LightToVertex).r;
 
 void main() {
     vec4 texColor = texture(uTextureImg, vTexCoords);
-    vec4 lightColor = vec4(uKa_Light1 + calcShadowFactorPointLight()*(pointBlinnPhong()), 1);
-    fFragColor = mix(texColor, lightColor, 0.8); // 0.5 est le coefficient d'interpolation
+    vec4 lightColor = vec4((uKa_Light1 + uKa_Light3) + calcShadowFactorPointLight()*(pointBlinnPhong()+pointBlinnPhong2()), 1);
+    fFragColor = mix(texColor, lightColor, 0.95); //interpolation
     //  fFragColor = vec4(vec3(texture(uTexture, LightToVertex).r),1);
 
 }

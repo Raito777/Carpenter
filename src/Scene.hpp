@@ -41,6 +41,14 @@ struct sceneLightSetup {
         this->uLightDir_vs    = glGetUniformLocation(shaderId, "uLightDir_vs_Light2");
         this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light2");
     }
+
+    void initPointLight2Glints(const unsigned int shaderId)
+    {
+        this->uLightPos_vs    = glGetUniformLocation(shaderId, "uLightPos_vs_Light3");
+        this->uLightIntensity = glGetUniformLocation(shaderId, "uLightIntensity_Light3");
+        this->uAmbient        = glGetUniformLocation(shaderId, "uKa_Light3");
+        this->uLightPos       = glGetUniformLocation(shaderId, "uLightPos_Light3");
+    }
 };
 
 struct lightTexture {
@@ -177,6 +185,8 @@ public:
     Character m_character;
 
     sceneLightSetup m_pointLight;
+    sceneLightSetup m_pointLight2;
+
     sceneLightSetup m_dirLight;
 
     TrackballCamera m_camera;
@@ -204,18 +214,26 @@ public:
 
         this->m_characterModel = loadOBJ("./assets/models/robot.obj");
 
-        m_pointLight._lightPos       = glm::vec3(-2, 0, -0.5);
-        m_pointLight.initialLightPos = m_pointLight._lightPos;
-
-        m_pointLight.lightColor            = glm::vec3(0.7, 0.5, 0.5);
-        m_pointLight._uLightIntensity      = m_pointLight.lightColor * 70.f;
-        m_pointLight.initialLightIntensity = m_pointLight.lightColor * 70.f;
+        m_pointLight._lightPos             = glm::vec3(-2, 0, -0.5);
+        m_pointLight.initialLightPos       = m_pointLight._lightPos;
+        m_pointLight.lightColor            = glm::vec3(0.8, 0.3, 0.3);
+        m_pointLight._uLightIntensity      = m_pointLight.lightColor * 50.f;
+        m_pointLight.initialLightIntensity = m_pointLight.lightColor * 50.f;
         m_pointLight._uAmbient             = glm::vec3(0.08f, 0.08f, 0.08f);
+
+        m_pointLight2._lightPos             = glm::vec3(0, 0, -1);
+        m_pointLight2.initialLightPos       = m_pointLight2._lightPos;
+        m_pointLight2.lightColor            = glm::vec3(0.2, 0.2, 0.8);
+        m_pointLight2._uLightIntensity      = m_pointLight2.lightColor * 60.f;
+        m_pointLight2.initialLightIntensity = m_pointLight2.lightColor * 60.f;
+        m_pointLight2._uAmbient             = glm::vec3(0.00f, 0.00f, 0.00f);
 
         m_dirLight._lightDir        = glm::vec3(0.0, 1, 0.0);
         m_dirLight._uLightIntensity = glm::vec3(0.f, 0.f, 0.f);
 
         m_pointLight.initPointLightGlints(shaderId);
+        m_pointLight2.initPointLight2Glints(shaderId);
+
         m_dirLight.initDirLightGlints(shaderId);
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
@@ -249,12 +267,12 @@ public:
         this->m_characterLightTexture._uShininess.push_back(0.5f);
 
         this->m_environment = Environment(1, 1, 1);
-        this->m_cage        = Environment(5, 5, 20);
+        this->m_cage        = Environment(9, 7, 12);
 
-        for (size_t i = 0; i < 50; i++)
+        for (size_t i = 0; i < 100; i++)
         {
-            glm::vec3 position{p6::random::number(-m_environment.m_sizeX, m_environment.m_sizeX), p6::random::number(-m_environment.m_sizeY, m_environment.m_sizeY), p6::random::number(-m_environment.m_sizeZ, m_environment.m_sizeZ)};
-            float     size = 0.1f;
+            glm::vec3 position{p6::random::number(-m_cage.m_sizeX, m_cage.m_sizeX), p6::random::number(-m_cage.m_sizeY, m_cage.m_sizeY), p6::random::number(-m_cage.m_sizeZ, m_cage.m_sizeZ)};
+            float     size = 0.2f;
             // float size = 0.1f;
             Boid boid(position, size);
             m_boids.push_back(boid);
@@ -265,6 +283,7 @@ public:
     {
         m_pointLight.initPointLightGlints(shaderId);
         m_dirLight.initDirLightGlints(shaderId);
+        m_pointLight2.initPointLight2Glints(shaderId);
 
         m_boidsTransformations.initModelTransformations(ctx, shaderId);
         m_environmentTransformations.initModelTransformations(ctx, shaderId);
